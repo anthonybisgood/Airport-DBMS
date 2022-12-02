@@ -3,6 +3,7 @@ import java.sql.*;                 // For access to the SQL interaction methods
 
 // TODO: Choose 3rd benefit
 // TODO: Choose 3rd Category for Query 4
+// TODO: Create Query 5 "You are required to implement the four provided queries as well as at least one query of your own design."
 
 
 public class Frontend {
