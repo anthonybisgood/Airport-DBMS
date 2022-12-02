@@ -104,6 +104,54 @@ public class Frontend {
         }
     }
 
+    private static void query1Handler(Scanner input, Connection dbConn) {
+
+    }
+
+    private static void query2Handler(Scanner input, Connection dbConn) {
+
+    }
+
+    private static void query3Handler(Scanner input, Connection dbConn) {
+
+    }
+
+    private static void query4Handler(Scanner input, Connection dbConn) {
+
+    }
+
+    /**
+     * Executes quaries that are passed in by paramenters through the dbConnection.
+     * (Influenced by Proffessor Mccanns JDBC.java)
+     * @param query The query string we wish to execute
+     * @param dbconn the Connection to the database and how we send quaries
+     * @param queryNum The number query that we wish to execute (1-3)
+     */
+    private static void executeQuery(String query, Connection dbConn, int queryNumber) {
+        Statement stmt = null;
+        ResultSet answer = null;
+        try {
+            stmt = dbConn.createStatement();
+            answer = stmt.executeQuery(query);
+            if (answer != null) {
+                    // Get the data about the query result to learn
+                    // the attribute names and use them as column headers
+                ResultSetMetaData answermetadata = answer.getMetaData();
+                    // Use next() to advance cursor through the result
+                    // tuples and print their attribute values
+                //TODO: parse answers here
+            }
+            stmt.close();
+        } catch (SQLException e) {
+            System.err.println("*** SQLException:  "
+                + "Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+        }
+    }
+
     /**
      * Provides the user with a help screen displaying the contents of each query
      */
