@@ -93,13 +93,13 @@ public class Frontend {
             } else if (value.equals("help")) {
                 helpScreen();
             } else if (value.equals("1")) {
-                query1Handler(input, dbConn);
+                query1Handler(dbConn);
             } else if (value.equals("2")) {
                 query2Handler(input, dbConn);
             } else if (value.equals("3")) {
                 query3Handler(input, dbConn);
             } else if (value.equals("4")) {
-                query4Handler(input, dbConn);
+                query4Handler(dbConn);
             } else if (value.equals("5")) {
                 query5Handler(input, dbConn);
             } else if (value.equals("rc")) {
@@ -110,19 +110,25 @@ public class Frontend {
         }
     }
 
-    private static void query1Handler(Scanner input, Connection dbConn) {
+    private static void query1Handler(Connection dbConn) {
 
     }
 
     private static void query2Handler(Scanner input, Connection dbConn) {
-
+        String date = validateDate(input, "march");
+        if (date == null) {
+            return;
+        }
+        // TODO: adjust flight month/day fields based on final table
+        String query = String.format("select PassengerID, NumBags from PassengerTrip join Flight on (flightID) where extract(DAY from Flight.BoardingTime) = %d and extract(MONTH from Flight.BoardingTime) = 3", date);
+        executeQuery(query, dbConn, 2);
     }
 
     private static void query3Handler(Scanner input, Connection dbConn) {
 
     }
 
-    private static void query4Handler(Scanner input, Connection dbConn) {
+    private static void query4Handler(Connection dbConn) {
 
     }
 
@@ -151,6 +157,9 @@ public class Frontend {
                     // Get the data about the query result to learn
                     // the attribute names and use them as column headers
                 ResultSetMetaData answermetadata = answer.getMetaData();
+                for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
+                    System.out.print(answermetadata.getColumnName(i) + "\t");
+                }
                     // Use next() to advance cursor through the result
                     // tuples and print their attribute values
                 //TODO: parse answers here
@@ -164,6 +173,46 @@ public class Frontend {
             System.err.println("\tErrorCode: " + e.getErrorCode());
             System.exit(-1);
         }
+    }
+
+    /**
+     * Takes the scanner input and the months of EITHER JUNE OR MARCH ONLY and asks the user
+     * for a date in each respective month until a valid date is inputed.
+     * @param input the Scanner object used to read user input
+     * @param month the months of either march or june to validate
+     * @return Returns a string of the valid user date in the respective month, or null if user exits
+     */
+    private static String validateDate(Scanner input, String month) {
+        int days = 31;
+        month = month.toLowerCase().strip();
+        if (month.equals("june")) {
+            days = 30;
+        }
+        String date = "";
+        while (true) {
+            System.out.printf("Enter a date from %s that you would like to query (1-%d).", month, days);
+            date = input.nextLine().strip();
+            // go back to main loop if user types exit
+            if (date.equals("exit")) {
+                return null;
+            }
+            try {
+                int dateNum = Integer.parseInt(date);
+                // if the user enters a valid number break the while loop, else keep going
+                if (dateNum > 0) {
+                    if (month.equals("june") && dateNum < 31) {
+                        break;
+                    }
+                    if (month.equals("march") && dateNum < 32) {
+                        break;
+                    }
+                }
+            // if user does not enter a number
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a number between 1 to 31 (inclusive)");
+            }
+        }
+        return date;
     }
 
     /**
