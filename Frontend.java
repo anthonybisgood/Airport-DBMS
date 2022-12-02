@@ -3,6 +3,7 @@ import java.sql.*;                 // For access to the SQL interaction methods
 
 // TODO: Choose 3rd benefit
 // TODO: Choose 3rd Category for Query 4
+// TODO: Create Query 5 "You are required to implement the four provided queries as well as at least one query of your own design."
 
 
 public class Frontend {
@@ -91,13 +92,15 @@ public class Frontend {
             } else if (value.equals("help")) {
                 helpScreen();
             } else if (value.equals("1")) {
-                
+                query1Handler(input, dbConn);
             } else if (value.equals("2")) {
-                
+                query2Handler(input, dbConn);
             } else if (value.equals("3")) {
-                
+                query3Handler(input, dbConn);
             } else if (value.equals("4")) {
-
+                query4Handler(input, dbConn);
+            } else if (value.equals("5")) {
+                query5Handler(input, dbConn);
             } else {
                 System.out.println("Please input a valid query number or type 'help' for help");
             }
@@ -117,6 +120,10 @@ public class Frontend {
     }
 
     private static void query4Handler(Scanner input, Connection dbConn) {
+
+    }
+
+    private static void query5Handler(Scanner input, Connection dbConn) {
 
     }
 
