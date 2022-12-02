@@ -82,22 +82,27 @@ public class Frontend {
     private static void takeInput(Connection dbConn) throws SQLException{
         Scanner input = new Scanner(System.in);
         while (true) {
-            System.out.println("Type your query: '1', '2' or '3', or 'exit' to exit the program.");
+            System.out.println("Type your query: '1', '2' or '3', '4', '5', or 'exit' to exit the program.");
             System.out.println("Type 'help' to view queries.");
+            System.out.println("Type 'rc' to edit records.");
             System.out.print(">: ");
-            String value = input.nextLine().toLowerCase();
+            String value = input.nextLine().strip().toLowerCase();
             if (value.equals("exit")){
                 System.exit(0);
             } else if (value.equals("help")) {
                 helpScreen();
             } else if (value.equals("1")) {
-                
+                query1Handler(input, dbConn);
             } else if (value.equals("2")) {
-                
+                query2Handler(input, dbConn);
             } else if (value.equals("3")) {
-                
+                query3Handler(input, dbConn);
             } else if (value.equals("4")) {
-
+                query4Handler(input, dbConn);
+            } else if (value.equals("5")) {
+                query5Handler(input, dbConn);
+            } else if (value.equals("rc")) {
+                editDatabase(input, dbConn);
             } else {
                 System.out.println("Please input a valid query number or type 'help' for help");
             }
@@ -117,6 +122,14 @@ public class Frontend {
     }
 
     private static void query4Handler(Scanner input, Connection dbConn) {
+
+    }
+
+    private static void query5Handler(Scanner input, Connection dbConn) {
+
+    }
+
+    private static void editDatabase(Scanner input, Connection dbConn) {
 
     }
 
