@@ -1,2 +1,11 @@
-Questions for TA:
+Questions/ Concerns
 1.) Are passengers allowed more than 1 benefit?
+2.) How are we storing dates in Flight
+3.) Field names should not have spaces, so just remove spaces from ERD when naming fields
+
+For query 2, does the list of passengers mean passenger ID or first/last name
+QUERY 2:
+select PassengerID, NumBags
+from PassengerTrip join Flight on (flightID)
+where extract(DAY from Flight.BoardingTime) = %d and 
+extract(MONTH from Flight.BoardingTime) = 3
