@@ -87,7 +87,7 @@ public class Frontend {
             System.out.println("Type 'help' to view queries.");
             System.out.println("Type 'rc' to edit records.");
             System.out.print(">: ");
-            String value = input.nextLine().strip().toLowerCase();
+            String value = input.nextLine().trim().toLowerCase();
             if (value.equals("exit")){
                 System.exit(0);
             } else if (value.equals("help")) {
@@ -120,7 +120,8 @@ public class Frontend {
             return;
         }
         // TODO: adjust flight month/day fields based on final table
-        String query = String.format("select PassengerID, NumBags from PassengerTrip join Flight on (flightID) where extract(DAY from Flight.BoardingTime) = %d and extract(MONTH from Flight.BoardingTime) = 3", date);
+        String query = String.format("select PassengerID, NumBags from PassengerTrip join Flight on (flightID) where extract(DAY from Flight.BoardingTime) = %s and extract(MONTH from Flight.BoardingTime) = 3", date);
+        System.out.println(query);
         executeQuery(query, dbConn, 2);
     }
 
@@ -184,14 +185,15 @@ public class Frontend {
      */
     private static String validateDate(Scanner input, String month) {
         int days = 31;
-        month = month.toLowerCase().strip();
+        month = month.toLowerCase().trim();
         if (month.equals("june")) {
             days = 30;
         }
         String date = "";
         while (true) {
-            System.out.printf("Enter a date from %s that you would like to query (1-%d).", month, days);
-            date = input.nextLine().strip();
+            System.out.printf("Enter a date from %s that you would like to query (1-%d).\n", month, days);
+            System.out.print(">: ");
+            date = input.nextLine().trim();
             // go back to main loop if user types exit
             if (date.equals("exit")) {
                 return null;
