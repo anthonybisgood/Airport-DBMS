@@ -111,7 +111,8 @@ public class Frontend {
     }
 
     private static void query1Handler(Connection dbConn) {
-
+        String query = "SELECT DISTINCT first_name last_name FROM Passenger INNER JOIN Passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id WHERE 4 IN (SELECT COUNT(DISTINCT airline_id) FROM Flight WHERE Flight.flight_id = Passenger_trip.flight_id)";
+        executeQuery(query, dbConn, 1);
     }
 
     private static void query2Handler(Scanner input, Connection dbConn) {
@@ -126,7 +127,7 @@ public class Frontend {
     }
 
     private static void query3Handler(Scanner input, Connection dbConn) {
-
+        
     }
 
     private static void query4Handler(Connection dbConn) {
