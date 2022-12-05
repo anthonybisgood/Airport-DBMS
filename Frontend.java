@@ -47,7 +47,7 @@ public class Frontend {
      * Creates a Db Connection with the oracleURL and the users username and
      * password, returns the connection
      * used to make queries. WRITTEN BY Proffessor Mccann, taken from JDBC.java
-     * 
+     *
      * @param oracleURL "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle"
      * @param username  the users oracle username
      * @param password  the users oracle password
@@ -84,7 +84,7 @@ public class Frontend {
 
     /**
      * Acts as user interface, where user inputs commands for quaries they want
-     * 
+     *
      * @param dbConn the Connection to the database and how we send quaries
      * @throws SQLException
      */
@@ -118,9 +118,9 @@ public class Frontend {
         }
     }
 
-    private static void query1Handler(Connection dbConn) {  
+    private static void query1Handler(Connection dbConn) {
         String query = "SELECT DISTINCT first_name, last_name " +
-        "FROM Passenger INNER JOIN Passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id " + 
+        "FROM Passenger INNER JOIN Passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id " +
         "WHERE 4 IN (SELECT COUNT(DISTINCT airline_id) FROM Flight WHERE Flight.flight_id = Passenger_trip.flight_id)";
         executeQuery(query, dbConn, 1);
     }
@@ -131,7 +131,7 @@ public class Frontend {
             return;
         }
         // TODO: adjust flight month/day fields based on final table
-        String query = "select Passenger_ID, Num_Bags "+ 
+        String query = "select Passenger_ID, Num_Bags "+
         "from Passenger_Trip join Flight on (flight_ID) "+
         "where extract(DAY from Flight.Boarding_time) = ? and extract(MONTH from Flight.Boarding_time) = 3";
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
@@ -151,7 +151,110 @@ public class Frontend {
         executeProtectedQuery(query, dbConn, string_parameters, int_parameters, 3);
     }
 
+    /* Purpose: Displays a series of queries for passengers on United Airlines,
+     * separated into the following passenger types: Student, Frequent Flyer, and Priority Boarding.
+     * For each of those passenger types flying on United Airlines, the results of these queries
+     * will be displayed:
+     *
+     * (Passenger Type) That traveled only once in the month of March
+     * (Passenger Type) That traveled with exactly one checked bag anytime in the months of June and July
+     * (Passenger Type) That ordered snacks/beverages on at least one flight
+     *
+     * Displays all information for those passengers
+     *
+     *
+     * Parameters:
+     *      dbconn: The current connection to the database
+     *
+     * Returns: Nothing, prints to console.
+     *
+     *
+     */
     private static void query4Handler(Connection dbConn) {
+        // Set the roles that we have for passengers
+        String[] types = {"'frequentflyer'", "'student'", "'priorityboarding'"};
+        // Set the airline for which we are making this query
+        String airline = "'United'";
+        // Start date of the month of march
+        String marchStart = "to_date('2021-03-01', 'YYYY-MM-DD')";
+        // End date of the month of march
+        String marchEnd = "to_date('2021-03-31', 'YYYY-MM-DD')";
+        // Start date of month of june
+        String juneStart = "to_date('2021-06-01', 'YYYY-MM-DD')";
+        // End date of month of July
+        String julEnd = "to_date('2021-07-31', 'YYYY-MM-DD')";
+
+        String passengerType;
+        String query;
+        for (int i = 0; i < types.length; i++){
+            passengerType = types[i];
+
+            // Query that returns all passengers of this passenger type
+            String passengerQuery =
+            "SELECT passenger.passenger_id, passenger.first_name, passenger.last_name FROM passenger "
+            + "JOIN passenger_benefit ON passenger.passenger_id=passenger_benefit.passenger_id "
+            + "JOIN benefit ON passenger_benefit.benefit_id=benefit.benefit_id "
+            + "WHERE benefit.category=" + passengerType;
+
+            // March Query
+            query = "SELECT pngrvalid.passenger_id, pngrvalid.first_name, pngrvalid.last_name FROM "
+                    + "(" + passengerQuery + ") pngrvalid "
+                    // Join with the passenger trips
+                    + "JOIN passenger_trip ON pngrvalid.passenger_id=passenger_trip.passenger_id "
+                    // Join with the flights
+                    + "JOIN flight ON passenger_trip.flight_id=flight.flight_id "
+                    // Join with the airlines
+                    + "JOIN airline ON flight.airline_id=airline.airline_id "
+                    // Filter only United Airlines
+                    + "WHERE airline.name=" + airline + " "
+                    // Filter such that we only get flights from March
+                    + "AND flight.departing_time > " + marchStart + " "
+                    + "AND flight.departing_time < " + marchEnd + " "
+                    // Ensure that we only get results that have one of these records
+                    + "GROUP BY pngrvalid.passenger_id, pngrvalid.first_name, pngrvalid.last_name "
+                    + "HAVING COUNT(pngrvalid.passenger_id)=1";
+
+            System.out.println("\nDisplaying results for " + passengerType + " passengers who flew " +
+                    "only once in the month of March");
+            System.out.println("----------------------------------");
+
+
+            executeQuery(query, dbConn, 4);
+
+            // One Checked Bag Query
+            // Passenger must have traveled with exactly one checked bag at least
+            // one time within the months of june or july
+            query = "SELECT DISTINCT pngrvalid.passenger_id, pngrvalid.first_name, pngrvalid.last_name FROM "
+                    + "(" + passengerQuery + ") pngrvalid "
+                    + "JOIN passenger_trip ON pngrvalid.passenger_id=passenger_trip.passenger_id "
+                    + "JOIN flight ON passenger_trip.flight_id=flight.flight_id "
+                    + "JOIN airline ON flight.airline_id=airline.airline_id "
+                    + "WHERE airline.name=" + airline + " "
+                    // Filter for trips with only one checked bag
+                    + "AND passenger_trip.num_bags=1 "
+                    // Filter for flights between June and July
+                    + "AND flight.departing_time > " + juneStart + " "
+                    + "AND flight.departing_time < " + julEnd;
+
+            System.out.println("\nDisplaying results for " + passengerType + " passengers" +
+                    " who traveled with exactly one checked bag in the months of June or July");
+            System.out.println("----------------------------------");
+            executeQuery(query, dbConn, 4);
+
+            // Ordered snacks/beverages query at least once
+            query = "SELECT DISTINCT pngrvalid.passenger_id, pngrvalid.first_name, pngrvalid.last_name FROM "
+                    + "(" + passengerQuery + ") pngrvalid "
+                    + "JOIN passenger_trip ON pngrvalid.passenger_id=passenger_trip.passenger_id "
+                    + "JOIN flight ON passenger_trip.flight_id=flight.flight_id "
+                    + "JOIN airline ON flight.airline_id=airline.airline_id "
+                    + "WHERE airline.name=" + airline
+                    + "AND passenger_trip.num_items_purchased > 0";
+
+            System.out.println("\nDisplaying results for " + passengerType + " passengers" +
+                    " who ordered beverages at least once on a flight");
+            System.out.println("----------------------------------");
+            executeQuery(query,dbConn, 4);
+        }
 
     }
 
@@ -224,7 +327,7 @@ public class Frontend {
         try {
             PreparedStatement sql = dbConn.prepareStatement(
                     "insert into passenger (email, phone_number, address, first_name, last_name) values (?,?,?,?,?)");
-            
+
             for (int i = 0; i < fields.length; i++) {
                 System.out.printf("Input a new %s\n", fields[i]);
                 res = input.nextLine().trim();
@@ -240,7 +343,7 @@ public class Frontend {
 
     /**
      * Method for taking in user input and allowing them to update fields in the passenger side of the DB
-     * including fields from the passenger Table, Passenger benefits, number of bags, the flights they take, 
+     * including fields from the passenger Table, Passenger benefits, number of bags, the flights they take,
      * and the food/drink that they have
      * @param input
      * @param dbConn
@@ -318,10 +421,10 @@ public class Frontend {
     }
 
     /**
-     * This method allows the user to change the number of bags a passenger has on a flight. Takes into 
-     * account if the flight is real, if the passenger is on that flight, and if the passenger is 
+     * This method allows the user to change the number of bags a passenger has on a flight. Takes into
+     * account if the flight is real, if the passenger is on that flight, and if the passenger is
      * a student(allowed 1 more bag). Changes num_bags field in passenger_trip.
-     * 
+     *
      * @param input
      * @param id Passenger id
      * @param dbConn
@@ -386,12 +489,12 @@ public class Frontend {
 
     /**
      * Uses user input to add/remove benefits from Passenger_benefits based on the passenger_id
-     * and benefit_id. Sanity checks benefit_id to make sure it is in bounds. 
+     * and benefit_id. Sanity checks benefit_id to make sure it is in bounds.
      * @param input Scanner for input
      * @param remove A boolean where true if the user is removing a benefit from the passenger and
      * false if the user is adding a benefit to the passenger.
      * @param id passenger ID
-     * @param dbConn 
+     * @param dbConn
      */
     private static void changeBenefits(Scanner input, Boolean remove, int id, Connection dbConn) {
         int benefit_id = -1;
@@ -420,11 +523,11 @@ public class Frontend {
             query = String.format("insert into passenger_benefit (passenger_id, benefit_id) values (?, ?)");
         }
         executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
-    } 
+    }
 
     /**
-     * Method for validating if an ID is in a table, also can be used for checking the join 
-     * of 2 conditions (if sneaky enough, check changeNumBags()). Executes a query and 
+     * Method for validating if an ID is in a table, also can be used for checking the join
+     * of 2 conditions (if sneaky enough, check changeNumBags()). Executes a query and
      * checks if the query resulted in a Result set that is empty.
      * @param id Any Id that you want to check
      * @param table the table which you want to check
@@ -457,7 +560,7 @@ public class Frontend {
 
     /**
      * Executes the query with a prepared statement to avoid sql injection entirely
-     * 
+     *
      * @param query The query to be executed
      * @param dbConn The connection to the database
      * @param string_parameters A hashmap of the string parameters to be inserted into the query
@@ -529,7 +632,7 @@ public class Frontend {
     }
 
     /**
-     * 
+     *
      * @param input
      * @param dbConn
      */
@@ -540,9 +643,9 @@ public class Frontend {
     /**
      * Executes quaries that are passed in by paramenters through the dbConnection.
      * (Influenced by Proffessor McCanns JDBC.java)
-     * 
+     *
      * @param query    The query string we wish to execute
-     * @param dbconn   the Connection to the database and how we send quaries
+     * @param dbonn   the Connection to the database and how we send quaries
      * @param queryNum The number query that we wish to execute (1-3)
      */
     private static void executeQuery(String query, Connection dbConn, int queryNumber) {
@@ -551,19 +654,35 @@ public class Frontend {
         try {
             stmt = dbConn.createStatement();
             answer = stmt.executeQuery(query);
+	    // The lengths of each of the column names for formatting purposes
+	    int[] colLengths;
             if (answer != null) {
                 // Get the data about the query result to learn
                 // the attribute names and use them as column headers
                 ResultSetMetaData answermetadata = answer.getMetaData();
+		colLengths = new int[answermetadata.getColumnCount()];
                 for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
                     System.out.print(answermetadata.getColumnName(i) + "\t");
+		    colLengths[i - 1] = answermetadata.getColumnName(i).length();
                 }
+		System.out.println();
                 if (queryNumber == 2) {
                     while (answer.next()) {
                         System.out.println(answer.getString("Passenger_ID") + "\t"
                         + answer.getInt("num_bags"));
                     }
                 }
+
+                else if (queryNumber == 4){
+                    while (answer.next()){
+                        System.out.println(answer.getInt("passenger_id") 
+			+ " ".repeat(colLengths[0] - String.valueOf(answer.getInt("passenger_id")).length()) + "\t"
+                        + answer.getString("first_name") 
+			+ " ".repeat(colLengths[1] - answer.getString("first_name").length()) + "\t"
+                        + answer.getString("last_name"));
+                    }
+                }
+
                 else {
 
                 }
@@ -588,7 +707,7 @@ public class Frontend {
      * Takes the scanner input and the months of EITHER JUNE OR MARCH ONLY and asks
      * the user
      * for a date in each respective month until a valid date is inputed.
-     * 
+     *
      * @param input the Scanner object used to read user input
      * @param month the months of either march or june to validate
      * @return Returns a string of the valid user date in the respective month, or
