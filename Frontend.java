@@ -134,7 +134,6 @@ public class Frontend {
         String query = "select Passenger_ID, Num_Bags "+ 
         "from Passenger_Trip join Flight on (flight_ID) "+
         "where extract(DAY from Flight.Boarding_time) = ? and extract(MONTH from Flight.Boarding_time) = 3";
-        System.out.println(query);
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
         HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
         string_parameters.put(1, date);
@@ -160,6 +159,11 @@ public class Frontend {
 
     }
 
+    /**
+     * Method for sending the user to either change the airline side of passenger side of the Database
+     * @param input
+     * @param dbConn
+     */
     private static void editDatabase(Scanner input, Connection dbConn) {
         String ans = "";
         while (true) {
@@ -220,6 +224,7 @@ public class Frontend {
         try {
             PreparedStatement sql = dbConn.prepareStatement(
                     "insert into passenger (email, phone_number, address, first_name, last_name) values (?,?,?,?,?)");
+            
             for (int i = 0; i < fields.length; i++) {
                 System.out.printf("Input a new %s\n", fields[i]);
                 res = input.nextLine().trim();
@@ -233,10 +238,35 @@ public class Frontend {
         }
     }
 
+    /**
+     * Method for taking in user input and allowing them to update fields in the passenger side of the DB
+     * including fields from the passenger Table, Passenger benefits, number of bags, the flights they take, 
+     * and the food/drink that they have
+     * @param input
+     * @param dbConn
+     */
     private static void updatePassengerInfo(Scanner input, Connection dbConn) {
-        int ret = -1;
+        int toChange = -1;
+        String query = "";
+        int id = -1;
         while (true) {
             System.out.println("What is the passenger id of the passenger you want to update?");
+            System.out.print(">: ");
+            String strId = input.nextLine().trim();
+            try {
+                id = Integer.parseInt(strId);
+            } catch (NumberFormatException e) {
+                System.out.println("Input a valid integer.");
+                continue;
+            }
+            if (!validateId(id, "passenger", dbConn, "passenger_id")) {
+                System.out.println("id is not in table, choose another");
+            } else {
+                break;
+            }
+        }
+        // TODO: 9/10
+        while (true) {
             System.out.println("What field would you like to update?");
             System.out.println("    Type '1' to change Email Address");
             System.out.println("    Type '2' to change Phone Number");
@@ -246,12 +276,14 @@ public class Frontend {
             System.out.println("    Type '6' to add Passenger benefit");
             System.out.println("    Type '7' to remove Passenger benefit");
             System.out.println("    Type '8' to change number of bags");
-            System.out.println("    Type '9' to add Flight");
+            System.out.println("    Type '9' to change passenger flights");
             System.out.println("    Type '10' to add Food/drink");
+            System.out.print(">: ");
             String ans = input.nextLine().trim();
+            // validate user input is an integer and within bounds
             try {
-                ret = Integer.parseInt(ans);
-                if (ret > 0 && ret < 11) {
+                toChange = Integer.parseInt(ans);
+                if (toChange > 0 && toChange < 11) {
                     break;
                 }
             } catch (NumberFormatException e) {
@@ -259,7 +291,168 @@ public class Frontend {
             }
             System.out.println("Please enter a valid integer (1-10)");
         }
-        
+        String[] fields = {"email", "phone_number", "address", "first_name", "last_name"};
+        HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
+        HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
+        if (toChange >=1 && toChange <=5) {
+            System.out.println("Please enter the updated value.");
+            String newVal = input.nextLine().trim();
+            System.out.print(">: ");
+            query = String.format("UPDATE passenger SET %s = ? where passenger_id = ?", fields[toChange-1]);
+            string_parameters.put(1, newVal);
+            int_parameters.put(2, id);
+            executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
+        } else if (toChange == 6 || toChange == 7) {
+            Boolean remove = (toChange == 7);
+            changeBenefits(input, remove, id, dbConn);
+        } else if (toChange == 8) {
+            changeNumBags(input, id, dbConn);
+        } else if (toChange == 9) {
+            changePassengerFlights(input, id, dbConn);
+        }
+    }
+
+    // make sure there arent any conflicting flights
+    private static void changePassengerFlights(Scanner input, int id, Connection dbConn) {
+
+    }
+
+    /**
+     * This method allows the user to change the number of bags a passenger has on a flight. Takes into 
+     * account if the flight is real, if the passenger is on that flight, and if the passenger is 
+     * a student(allowed 1 more bag). Changes num_bags field in passenger_trip.
+     * 
+     * @param input
+     * @param id Passenger id
+     * @param dbConn
+     */
+    private static void changeNumBags(Scanner input, int id, Connection dbConn) {
+        int flight_ID = -1;
+        while (true) {
+            System.out.println("Enter a flight ID number");
+            System.out.print(">: ");
+            try {
+                String in = input.nextLine().trim();
+                if (in.equals("exit")) {
+                    return;
+                }
+                flight_ID = Integer.parseInt(in);
+                // check if the flight is real
+                if (validateId(flight_ID, "Passenger_trip", dbConn, "flight_id")) {
+                    // check if passenger is on that flight
+                    if (validateId(flight_ID, "Passenger_trip", dbConn, "passenger_id = " + id + " and flight_id")) {
+                        break;
+                    } else {
+                        System.out.println("Passenger is not on that Flight.");
+                    }
+                } else {
+                    System.out.println("Flight ID not in DB records.");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Input an integer");
+            }
+        }
+        int num_bags = 0;
+        // checks to see if the passenger is a student
+        boolean isStudent = validateId(id, "passenger_benefit", dbConn, "benefit_id = 2 and passenger_id");
+        while (true) {
+            System.out.println("How many bags? (Max 2 unless student).");
+            System.out.print(">: ");
+            try{
+                String in = input.nextLine().trim();
+                if (in.equals("exit")) {
+                    return;
+                }
+                num_bags = Integer.parseInt(in);
+                if (num_bags == 3 && isStudent) {
+                    break;
+                } else if (num_bags < 0 || num_bags > 2) {
+                    System.out.println("Max number of bags is 2 (excluding students), cannot have negative bags");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Input an integer");
+            }
+        }
+        String query = "UPDATE passenger_trip SET num_bags = ? where flight_id = ? and passenger_id = ?";
+        HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
+        HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
+        int_parameters.put(1, num_bags);
+        int_parameters.put(2, flight_ID);
+        int_parameters.put(3, id);
+        executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
+    }
+
+    /**
+     * Uses user input to add/remove benefits from Passenger_benefits based on the passenger_id
+     * and benefit_id. Sanity checks benefit_id to make sure it is in bounds. 
+     * @param input Scanner for input
+     * @param remove A boolean where true if the user is removing a benefit from the passenger and
+     * false if the user is adding a benefit to the passenger.
+     * @param id passenger ID
+     * @param dbConn 
+     */
+    private static void changeBenefits(Scanner input, Boolean remove, int id, Connection dbConn) {
+        int benefit_id = -1;
+        String query = "";
+        while (true) {
+            System.out.println("What is the benefit id that you would like to add/remove?");
+            System.out.print(">: ");
+            try {
+                benefit_id = Integer.parseInt(input.nextLine().trim());
+                if (benefit_id < 1 || benefit_id > 3) {
+                    System.out.println("Please enter a valid Integer (1-3)");
+                } else {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter an Integer");
+            }
+        }
+        HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
+        HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
+        int_parameters.put(1, id);
+        int_parameters.put(2, benefit_id);
+        if (remove) {
+            query = String.format("delete from passenger_benefit where passenger_id = ? and benefit_id = ?");
+        } else {
+            query = String.format("insert into passenger_benefit (passenger_id, benefit_id) values (?, ?)");
+        }
+        executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
+    } 
+
+    /**
+     * Method for validating if an ID is in a table, also can be used for checking the join 
+     * of 2 conditions (if sneaky enough, check changeNumBags()). Executes a query and 
+     * checks if the query resulted in a Result set that is empty.
+     * @param id Any Id that you want to check
+     * @param table the table which you want to check
+     * @param dbConn Connection to the DB
+     * @param field The field attr that the ID is based on (if id is a flight_id (Ex. 31), field is 'flight_id')
+     * @return Returns a boolean if the id is in the table or not.
+     */
+    private static boolean validateId(Integer id, String table, Connection dbConn, String field) {
+        String query = String.format("select * from %s where %s = ?", table, field);
+        try {
+            PreparedStatement statement = dbConn.prepareStatement(query);
+            statement.setInt(1, id);
+            ResultSet answer = statement.executeQuery();
+            while (answer.next()) {
+                ResultSetMetaData answermetadata = answer.getMetaData();
+                if (answermetadata.getColumnCount() > 0) {
+                    statement.close();
+                    return true;
+                } else{
+                    statement.close();
+                    return false;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+        return false;
     }
 
     /**
@@ -280,24 +473,26 @@ public class Frontend {
             for (Integer key : int_parameters.keySet()) {
                 statement.setInt(key, int_parameters.get(key));
             }
+            if (queryNumber < 0) {
+                statement.executeUpdate();
+                statement.close();
+                dbConn.commit();
+                return;
+            }
             ResultSet answer = statement.executeQuery();
-            while (answer.next()) {
-                ResultSetMetaData answermetadata = answer.getMetaData();
-                for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
-                    System.out.print(answermetadata.getColumnName(i) + "\t");
-                }
-                for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
-                    System.out.print(answer.getString(i) + "\t");
+            if (answer != null) {
+                while (answer.next()) {
+                    ResultSetMetaData answermetadata = answer.getMetaData();
+                    for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
+                        System.out.print(answermetadata.getColumnName(i) + "\t");
+                    }
+                    for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
+                        System.out.print(answer.getString(i) + "\t");
+                    }
                 }
             }
             statement.close();
-            
-    /**
-     * Allows the user to delete a passenger by their passenger_id number, deletes all instances of that
-     * passenger across all tables
-     * @param input
-     * @param dbConn
-     */
+            dbConn.commit();
         } catch(SQLException e) {
             System.err.println("*** SQLException:  "
                 + "Could not fetch query results.");
@@ -306,9 +501,14 @@ public class Frontend {
             System.err.println("\tErrorCode: " + e.getErrorCode());
             System.exit(-1);
         }
-
     }
 
+    /**
+     * Allows the user to delete a passenger by their passenger_id number, deletes all instances of that
+     * passenger across all tables
+     * @param input
+     * @param dbConn
+     */
     private static void deletePassengerInfo(Scanner input, Connection dbConn) {
         int idNum = -1;
         while (true) {
@@ -451,7 +651,6 @@ public class Frontend {
         // TODO: Chose the 3rd Category of our choice and airline to query
         System.out.println("QUERY 4: Displays the a list of Students, Frequent Flyers, and ____ for ____ who: ");
         System.out.println("         1.) Traveled only once in the month of March.");
-        System.out.println(
         System.out.println("         2.) Traveled with exactly one checked in bag anytime in the months of June aand July.");
         System.out.println("         3.) Ordered snacks/beverages on at least one flight.\n");
     }
