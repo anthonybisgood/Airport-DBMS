@@ -428,7 +428,7 @@ public class Frontend {
         // TODO: Chose the 3rd Category of our choice and airline to query
         System.out.println("QUERY 4: Displays the a list of Students, Frequent Flyers, and ____ for ____ who: ");
         System.out.println("         1.) Traveled only once in the month of March.");
-        System.out.println("         2.) Traveled with exactly one checked in bag anytime in the months of June aand July.");
+                "         2.) Traveled with exactly one checked in bag anytime in the months of June aand July.");
         System.out.println("         3.) Ordered snacks/beverages on at least one flight.\n");
     }
 }
