@@ -129,7 +129,90 @@ public class Frontend {
 
     }
 
+    /* Purpose: Displays a series of queries for passengers on United Airlines,
+     * separated into the following passenger types: Student, Frequent Flyer, and Priority Boarding.
+     * For each of those passenger types flying on United Airlines, the results of these queries
+     * will be displayed:
+     *
+     * (Passenger Type) That traveled only once in the month of March
+     * (Passenger Type) That traveled with exactly one checked bag anytime in the months of June and July
+     * (Passenger Type) That ordered snacks/beverages on at least one flight
+     *
+     * Displays all information for those passengers
+     *
+     *
+     * Parameters:
+     *      dbconn: The current connection to the database
+     *
+     * Returns: Nothing, prints to console.
+     *
+     *
+     */
     private static void query4Handler(Connection dbConn) {
+        // Set the roles that we have for passengers
+        String[] types = {"'frequentflyer", "'student'", "'priorityboarding'"};
+        // Set the airline for which we are making this query
+        String airline = "'United'";
+        // Start date of the month of march
+        String marchStart = "to_date('2021-03-01', 'YYYY-MM-DD')";
+        // End date of the month of march
+        String marchEnd = "to_date('2021-03-31', 'YYYY-MM-DD')";
+        // Start date of month of june
+        String juneStart = "to_date('2021-06-01', 'YYYY-MM-DD')";
+        // End date of month of July
+        String julEnd = "to_date('2021-07-31', 'YYYY-MM-DD')";
+
+        String passengerType;
+        String query;
+        for (int i = 0; i < types.length; i++){
+            passengerType = types[i];
+
+            // Query that returns all passengers of this passenger type
+            String passengerQuery =
+            "SELECT passenger_id, first_name, last_name FROM passenger "
+            + "JOIN passenger_benefit ON passenger.passenger_id=passenger_benefit.passenger_id "
+            + "JOIN benefit ON passenger_benefit.benefit_id=benefit.benefit_id "
+            + "WHERE benefit.category=" + passengerType;
+
+            // March Query
+            query = "SELECT passenger_id, first_name, last_name FROM "
+                    + "(" + passengerQuery + ") pngrvalid "
+                    // Join with the passenger trips
+                    + "JOIN passenger_trip ON pngrvalid.passenger_id=passenger_trip.passenger_id "
+                    // Join with the flights
+                    + "JOIN flight ON passenger_trip.flight_id=flight.flight_id "
+                    // Join with the airlines
+                    + "JOIN airline ON flight.airline_id=airline.airline_id "
+                    // Filter only United Airlines
+                    + "WHERE airline.name=" + airline + " "
+                    // Filter such that we only get flights from March
+                    + "AND flight.departing_time > " + marchStart + " "
+                    + "AND flight.departing_time < " + marchEnd + " "
+                    // Ensure that we only get results that have one of these records
+                    + "GROUP BY pngrvalid.passenger_id"
+                    + "HAVING COUNT(pngrvalid.passenger_id)=1";
+
+            // TODO execute query
+
+            // One Checked Bag Query
+            // Passenger must have traveled with exactly one checked bag at least
+            // one time within the months of june or july
+            query = "SELECT DISTINCT passenger_id, first_name, last_name FROM "
+                    + "(" + passengerQuery + ") pngrvalid "
+                    + "JOIN passenger_trip ON pngrvalid.passenger_id=passenger_trip.passenger_id"
+                    + "JOIN flight ON passenger_trip.flight_id=flight.flight_id"
+                    + "JOIN airline ON flight.airline_id=airline.airline_id "
+                    + "WHERE airline.name=" + airline + " "
+                    // Filter for trips with only one checked bag
+                    + "AND passenger.trip.num_bags=1 "
+                    // Filter for flights between June and July
+                    + "AND flight.departing_time > " + juneStart + " "
+                    + "AND flight.departing_time < " + julEnd;
+
+            // TODO execute query
+
+            // Ordered snacks/beverages query at least once
+        }
 
     }
 
@@ -145,8 +228,8 @@ public class Frontend {
      * Executes quaries that are passed in by paramenters through the dbConnection.
      * (Influenced by Proffessor Mccanns JDBC.java)
      * @param query The query string we wish to execute
-     * @param dbconn the Connection to the database and how we send quaries
-     * @param queryNum The number query that we wish to execute (1-3)
+     * @param dbConn the Connection to the database and how we send quaries
+     * @param queryNumber The number query that we wish to execute (1-3)
      */
     private static void executeQuery(String query, Connection dbConn, int queryNumber) {
         Statement stmt = null;
