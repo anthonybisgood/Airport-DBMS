@@ -201,7 +201,6 @@ public class Frontend {
      */
     private static void addPassenger(Scanner input, Connection dbConn) {
         String[] fields = { "email", "phone_number", "address", "first_name", "last_name" };
-        HashMap<String, String> map = new HashMap<String, String>();
         String res;
         try {
             PreparedStatement sql = dbConn.prepareStatement(
@@ -209,7 +208,6 @@ public class Frontend {
             for (int i = 0; i < fields.length; i++) {
                 System.out.printf("Input a new %s\n", fields[i]);
                 res = input.nextLine().trim();
-                map.put(fields[i], res);
                 sql.setString(i + 1, res);
             }
             sql.execute();
@@ -221,9 +219,40 @@ public class Frontend {
     }
 
     private static void updatePassengerInfo(Scanner input, Connection dbConn) {
+        int ret = -1;
+        while (true) {
+            System.out.println("What is the passenger id of the passenger you want to update?");
+            System.out.println("What field would you like to update?");
+            System.out.println("    Type '1' to change Email Address");
+            System.out.println("    Type '2' to change Phone Number");
+            System.out.println("    Type '3' to change Address");
+            System.out.println("    Type '4' to change First Name");
+            System.out.println("    Type '5' to change Last Name");
+            System.out.println("    Type '6' to add Passenger benefit");
+            System.out.println("    Type '7' to remove Passenger benefit");
+            System.out.println("    Type '8' to change number of bags");
+            System.out.println("    Type '9' to add Flight");
+            System.out.println("    Type '10' to add Food/drink");
+            String ans = input.nextLine().trim();
+            try {
+                ret = Integer.parseInt(ans);
+                if (ret > 0 && ret < 11) {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter an Integer");
+            }
+            System.out.println("Please enter a valid integer (1-10)");
+        }
         
     }
 
+    /**
+     * Allows the user to delete a passenger by their passenger_id number, deletes all instances of that
+     * passenger across all tables
+     * @param input
+     * @param dbConn
+     */
     private static void deletePassengerInfo(Scanner input, Connection dbConn) {
         int idNum = -1;
         while (true) {
@@ -280,13 +309,7 @@ public class Frontend {
                     }
                 }
                 else {
-                    // while (answer.next()) {
-                    //     for (int i = 0; i < columns.size(); i++) {
-                    //         System.out.println(columns.get(i));
-                            
-                    //         System.out.print(answer.getString(columns.get(i)) + "\t");
-                    //     }
-                    // }
+
                 }
                 // Use next() to advance cursor through the result
                 // tuples and print their attribute values
