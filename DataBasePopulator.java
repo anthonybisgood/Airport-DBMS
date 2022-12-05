@@ -52,7 +52,7 @@ public class DataBasePopulator {
                 createTables(dbconn, "passenger_history", ph, phpk);
 
                 // creates passenger trips
-                String pt = "id integer , passenger_id integer, flight_id integer, num_bags integer";
+                String pt = "id integer , passenger_id integer, flight_id integer, num_bags integer, num_items_purchased integer";
                 String ptpk = "id";
                 createTables(dbconn, "passenger_trip", pt, ptpk);
 
@@ -269,9 +269,11 @@ public class DataBasePopulator {
                     }
                     for (int j = 0; j < 5; j++) {
                         PreparedStatement sql = dbconn.prepareStatement(
-                                "insert into passenger_trip  (passenger_id, flight_id) values (?,?)");
+                                "insert into passenger_trip  (passenger_id, flight_id, num_bags, num_items_purchased) values (?,?,?, ?)");
                         sql.setInt(1, parray.get(rand.nextInt(30)));
                         sql.setInt(2, flight);
+                        sql.setInt(3, rand.nextInt(4));
+                        sql.setInt(4, rand.nextInt(4));
                         sql.execute();
                     }
                     dbconn.commit();
