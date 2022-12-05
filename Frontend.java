@@ -1,3 +1,4 @@
+import java.util.HashMap;
 import java.util.Scanner;
 import java.sql.*;                 // For access to the SQL interaction methods
 
@@ -110,8 +111,10 @@ public class Frontend {
         }
     }
 
-    private static void query1Handler(Connection dbConn) {
-        String query = "SELECT DISTINCT first_name last_name FROM Passenger INNER JOIN Passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id WHERE 4 IN (SELECT COUNT(DISTINCT airline_id) FROM Flight WHERE Flight.flight_id = Passenger_trip.flight_id)";
+    private static void query1Handler(Connection dbConn) {  
+        String query = "SELECT DISTINCT first_name, last_name " +
+        "FROM Passenger INNER JOIN Passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id " + 
+        "WHERE 4 IN (SELECT COUNT(DISTINCT airline_id) FROM Flight WHERE Flight.flight_id = Passenger_trip.flight_id)";
         executeQuery(query, dbConn, 1);
     }
 
@@ -121,13 +124,25 @@ public class Frontend {
             return;
         }
         // TODO: adjust flight month/day fields based on final table
-        String query = String.format("select PassengerID, NumBags from PassengerTrip join Flight on (flightID) where extract(DAY from Flight.BoardingTime) = %s and extract(MONTH from Flight.BoardingTime) = 3", date);
+        String query = "select Passenger_ID, Num_Bags "+ 
+        "from Passenger_Trip join Flight on (flight_ID) "+
+        "where extract(DAY from Flight.Boarding_time) = ? and extract(MONTH from Flight.Boarding_time) = 3";
         System.out.println(query);
-        executeQuery(query, dbConn, 2);
+        HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
+        HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
+        string_parameters.put(1, date);
+        executeProtectedQuery(query, dbConn, string_parameters, int_parameters, 2);
     }
 
     private static void query3Handler(Scanner input, Connection dbConn) {
-        
+         String query = "SELECT DISTINCT flight_id boarding_gate name boarding_time departing_time duration origin destination " +
+        "FROM Flight WHERE EXTRACT(MONTH FROM Flight.boarding_time) = 'June' AND " +
+        "EXTRACT(DAY FROM Flight.boarding_time) = ?";
+        HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
+        HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
+        String month = validateDate(input, "june");
+        string_parameters.put(1, month);
+        executeProtectedQuery(query, dbConn, string_parameters, int_parameters, 3);
     }
 
     private static void query4Handler(Connection dbConn) {
@@ -139,6 +154,47 @@ public class Frontend {
     }
 
     private static void editDatabase(Scanner input, Connection dbConn) {
+
+    }
+
+    /**
+     * Executes the query with a prepared statement to avoid sql injection entirely
+     * 
+     * @param query The query to be executed
+     * @param dbConn The connection to the database
+     * @param string_parameters A hashmap of the string parameters to be inserted into the query
+     * @param int_parameters A hashmap of the int parameters to be inserted into the query
+     * @param queryNumber The number of the query
+     */
+    private static void executeProtectedQuery(String query, Connection dbConn, HashMap<Integer, String> string_parameters, HashMap<Integer, Integer> int_parameters, int queryNumber) {
+        try {
+            PreparedStatement statement = dbConn.prepareStatement(query);
+            for (Integer key : string_parameters.keySet()) {
+                statement.setString(key, string_parameters.get(key));
+            }
+            for (Integer key : int_parameters.keySet()) {
+                statement.setInt(key, int_parameters.get(key));
+            }
+            ResultSet answer = statement.executeQuery();
+            while (answer.next()) {
+                ResultSetMetaData answermetadata = answer.getMetaData();
+                for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
+                    System.out.print(answermetadata.getColumnName(i) + "\t");
+                }
+                for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
+                    System.out.print(answer.getString(i) + "\t");
+                }
+            }
+            statement.close();
+            
+        } catch(SQLException e) {
+            System.err.println("*** SQLException:  "
+                + "Could not fetch query results.");
+            System.err.println("\tMessage:   " + e.getMessage());
+            System.err.println("\tSQLState:  " + e.getSQLState());
+            System.err.println("\tErrorCode: " + e.getErrorCode());
+            System.exit(-1);
+        }
 
     }
 
