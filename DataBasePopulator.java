@@ -72,7 +72,7 @@ public class DataBasePopulator {
                 createTables(dbconn, "staff_member", sm, smpk);
 
                 // creates flight
-                String f = "flight_id integer , airline_id integer, boarding_gate varchar2(20), departing_time date, boarding_time date, duration varchar2(20), origin varchar2(20), destination varchar2(20)";
+                String f = "flight_id integer , airline_id integer, boarding_gate varchar2(20), departing_time TIMESTAMP, boarding_time TIMESTAMP, duration varchar2(20), origin varchar2(20), destination varchar2(20)";
                 String fpk = "flight_id";
                 createTables(dbconn, "flight", f, fpk);
 
@@ -332,8 +332,11 @@ public class DataBasePopulator {
                     PreparedStatement sql = dbconn.prepareStatement(
                             "insert into flight  ( boarding_time, departing_time, boarding_gate,  duration, origin, destination, airline_id) values (?,?,?,?,?, ? , ?)");
                     for (int j = 3; j < 7; j++) {
+                        if (j ==4) {continue;}
                         sql.setString(j, randString());
                     }
+                    String randDuration = String.valueOf(rand.nextInt(20));
+                    sql.setString(4, randDuration);
                     long rangeend = Timestamp.valueOf("2022-12-31 00:00:00").getTime();
                     long rangebegin = Timestamp.valueOf("2013-02-08 00:58:00").getTime();
                     long diff = rangeend - rangebegin + 1;
