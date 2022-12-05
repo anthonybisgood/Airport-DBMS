@@ -383,7 +383,7 @@ public class DataBasePopulator {
                         Arrays.asList("'frequentflyer'", "'student'", "'priorityboarding'"));
                 for (int i = 0; i < benefits.size(); i++) {
                     stmt = dbconn.createStatement();
-                    stmt.execute("insert into benefit  (category) values  ( " + roles.get(i) + " ) ");
+                    stmt.execute("insert into benefit  (category) values  ( " + benefits.get(i) + " ) ");
 
                 }
 
