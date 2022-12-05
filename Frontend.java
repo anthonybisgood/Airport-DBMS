@@ -200,7 +200,7 @@ public class Frontend {
                     + "GROUP BY pngrvalid.passenger_id"
                     + "HAVING COUNT(pngrvalid.passenger_id)=1";
 
-            // TODO execute query
+            // TODO execute query and print
 
             // One Checked Bag Query
             // Passenger must have traveled with exactly one checked bag at least
@@ -217,9 +217,18 @@ public class Frontend {
                     + "AND flight.departing_time > " + juneStart + " "
                     + "AND flight.departing_time < " + julEnd;
 
-            // TODO execute query
+            // TODO execute query and print
 
             // Ordered snacks/beverages query at least once
+            query = "SELECT DISTINCT passenger_id, first_name, last_name FROM "
+                    + "(" + passengerQuery + ") pngrvalid "
+                    + "JOIN passenger_trip ON pngrvalid.passenger_id=passenger_trip.passenger_id"
+                    + "JOIN flight ON passenger_trip.flight_id=flight.flightid "
+                    + "JOIN airline ON flight.airline_id=airline.airline_id "
+                    + "WHERE airline.name=" + airline
+                    + "AND passenger_trip.num_items_purchased > 0";
+
+            // TODO execute query and print
         }
 
     }
@@ -340,7 +349,7 @@ public class Frontend {
      * (Influenced by Proffessor McCanns JDBC.java)
      *
      * @param query    The query string we wish to execute
-     * @param dbconn   the Connection to the database and how we send quaries
+     * @param dbonn   the Connection to the database and how we send quaries
      * @param queryNum The number query that we wish to execute (1-3)
      */
     private static void executeQuery(String query, Connection dbConn, int queryNumber) {
