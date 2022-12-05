@@ -128,7 +128,7 @@ public class Frontend {
             return;
         }
         String query = String.format(
-                "select Passenger_ID, num_Bags from Passenger_Trip join Flight using (flight_ID) where extract(DAY from Flight.Boarding_Time) = %s and extract(MONTH from Flight.Boarding_Time) = 3",
+                "select distinct Passenger_ID, num_Bags from Passenger_Trip join Flight using (flight_ID) where extract(DAY from Flight.Boarding_Time) = %s and extract(MONTH from Flight.Boarding_Time) = 3",
                 date);
         executeQuery(query, dbConn, 2);
     }
@@ -166,10 +166,15 @@ public class Frontend {
         }
     }
 
+    /**
+     * Method for taking user input on if to add, update, or delete passenger info from the database.
+     * @param input
+     * @param dbConn
+     */
     private static void editPassengerInfo(Scanner input, Connection dbConn) {
         String ans = "";
         while (true) {
-            System.out.println("Type 1 to add passenger, 2 to update passenger info, or 3 to delete a passenger");
+            System.out.println("Type '1' to add passenger, '2' to update passenger info, or '3' to delete a passenger");
             ans = input.nextLine().trim();
             if (ans.equals("exit")) {
                 return;
@@ -182,17 +187,26 @@ public class Frontend {
         }
         if (ans.equals("1")) {
             addPassenger(input, dbConn);
+        } else if (ans.equals("2")) {
+            updatePassengerInfo(input, dbConn);
+        } else if (ans.equals("3")) {
+            deletePassengerInfo(input, dbConn);
         }
     }
 
+    /**
+     * takes user input about a new passenger and adds it to the database.
+     * @param input
+     * @param dbConn
+     */
     private static void addPassenger(Scanner input, Connection dbConn) {
-        String[] fields = { "email", "phone_number", "address", "first_name", "last_name", "benefit_id" };
+        String[] fields = { "email", "phone_number", "address", "first_name", "last_name" };
         HashMap<String, String> map = new HashMap<String, String>();
         String res;
         try {
             PreparedStatement sql = dbConn.prepareStatement(
                     "insert into passenger (email, phone_number, address, first_name, last_name) values (?,?,?,?,?)");
-            for (int i = 0; i < fields.length-1; i++) {
+            for (int i = 0; i < fields.length; i++) {
                 System.out.printf("Input a new %s\n", fields[i]);
                 res = input.nextLine().trim();
                 map.put(fields[i], res);
@@ -206,6 +220,34 @@ public class Frontend {
         }
     }
 
+    private static void updatePassengerInfo(Scanner input, Connection dbConn) {
+        
+    }
+
+    private static void deletePassengerInfo(Scanner input, Connection dbConn) {
+        int idNum = -1;
+        while (true) {
+            System.out.println("Enter the passenger_id that you would like to delete");
+            String id = input.nextLine().trim();
+            try {
+                idNum = Integer.parseInt(id);
+                break;
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid number");
+            }
+        }
+        String[] tables = {"passenger", "passenger_trip", "passenger_benefit", "passenger_history"};
+        for (int i = 0; i < tables.length; i++) {
+            String query = String.format("delete from %s where passenger_id = %d", tables[i], idNum);
+            executeQuery(query, dbConn, -1);
+        }
+    }
+
+    /**
+     * 
+     * @param input
+     * @param dbConn
+     */
     private static void editFlightInfo(Scanner input, Connection dbConn) {
 
     }
@@ -237,10 +279,20 @@ public class Frontend {
                         + answer.getInt("num_bags"));
                     }
                 }
+                else {
+                    // while (answer.next()) {
+                    //     for (int i = 0; i < columns.size(); i++) {
+                    //         System.out.println(columns.get(i));
+                            
+                    //         System.out.print(answer.getString(columns.get(i)) + "\t");
+                    //     }
+                    // }
+                }
                 // Use next() to advance cursor through the result
                 // tuples and print their attribute values
                 // TODO: parse answers here
             }
+            dbConn.commit();
             System.out.println();
             stmt.close();
         } catch (SQLException e) {
