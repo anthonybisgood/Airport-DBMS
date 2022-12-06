@@ -402,7 +402,6 @@ public class Frontend {
                 break;
             }
         }
-        // TODO: 9,10
         while (true) {
             System.out.println("What field would you like to update?");
             System.out.println("    Type '1' to change Email Address");
@@ -452,7 +451,8 @@ public class Frontend {
     }
 
     /**
-     * 
+     * Allows the user to change the amount of food a passenger has bought on one of
+     * their trips.
      * @param input
      * @param id
      * @param dbConn
@@ -487,7 +487,13 @@ public class Frontend {
         executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
     }
 
-    // make sure there arent any conflicting flights
+    /**
+     * Allows the user to update passenger info in realation to adding/removing flights from the
+     * database. When adding flights, checks if the passenger has the same boarding date before adding.
+     * @param input
+     * @param id
+     * @param dbConn
+     */
     private static void changePassengerFlights(Scanner input, int id, Connection dbConn) {
         String ret = "";
         while (true) {
@@ -575,6 +581,14 @@ public class Frontend {
         }
     }
 
+    /**
+     * Takes user input of a flight number and returns that flight number if the passenger is 
+     * on that flight and if that flight_id is valid.
+     * @param input
+     * @param id Passenger_id
+     * @param dbConn
+     * @return
+     */
     private static int validatePassengerOnFlight(Scanner input, int id, Connection dbConn) {
         int flight_ID = -1;
         while (true) {
@@ -606,10 +620,8 @@ public class Frontend {
 
     /**
      * This method allows the user to change the number of bags a passenger has on a
-     * flight. Takes into
-     * account if the flight is real, if the passenger is on that flight, and if the
-     * passenger is
-     * a student(allowed 1 more bag). Changes num_bags field in passenger_trip.
+     * flight. Takes into account if the flight is real, if the passenger is on that flight, 
+     * and if the passenger is a student(allowed 1 more bag). Changes num_bags field in passenger_trip.
      * 
      * @param input
      * @param id     Passenger id
@@ -653,17 +665,14 @@ public class Frontend {
     }
 
     /**
-     * <<<<<<< HEAD
      * Uses user input to add/remove benefits from Passenger_benefits based on the
-     * passenger_id
-     * and benefit_id. Sanity checks benefit_id to make sure it is in bounds.
+     * passenger_id and benefit_id. Sanity checks benefit_id to make sure it is in bounds.
      * 
      * @param input  Scanner for input
      * @param remove A boolean where true if the user is removing a benefit from the
      *               passenger and
      *               false if the user is adding a benefit to the passenger.
      * @param id     passenger ID
-     *               =======
      *               Uses user input to add/remove benefits from Passenger_benefits
      *               based on the passenger_id
      *               and benefit_id. Sanity checks benefit_id to make sure it is in
@@ -673,7 +682,6 @@ public class Frontend {
      *               passenger and
      *               false if the user is adding a benefit to the passenger.
      * @param id     passenger ID
-     *               >>>>>>> main
      * @param dbConn
      */
     private static void changeBenefits(Scanner input, Boolean remove, int id, Connection dbConn) {
@@ -706,7 +714,6 @@ public class Frontend {
     }
 
     /**
-     * <<<<<<< HEAD
      * Method for validating if an ID is in a table, also can be used for checking
      * the join
      * of 2 conditions (if sneaky enough, check changeNumBags()). Executes a query
@@ -843,7 +850,7 @@ public class Frontend {
      * (Influenced by Proffessor McCanns JDBC.java)
      *
      * @param query    The query string we wish to execute
-     * @param dbonn   the Connection to the database and how we send quaries
+     * @param dbonn    the Connection to the database and how we send quaries
      * @param queryNum The number query that we wish to execute (1-3)
      */
     private static void executeQuery(String query, Connection dbConn, int queryNumber) {
@@ -860,25 +867,26 @@ public class Frontend {
                 ResultSetMetaData answermetadata = answer.getMetaData();
                 colLengths = new int[answermetadata.getColumnCount()];
                 for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
-                        System.out.print(answermetadata.getColumnName(i) + "\t");
-                colLengths[i - 1] = answermetadata.getColumnName(i).length();
-                    }
+                    System.out.print(answermetadata.getColumnName(i) + "\t");
+                    colLengths[i - 1] = answermetadata.getColumnName(i).length();
+                }
                 System.out.println();
                 if (queryNumber == 2) {
                     while (answer.next()) {
                         System.out.println(answer.getString("Passenger_ID") + "\t"
-                        + answer.getInt("num_bags"));
+                                + answer.getInt("num_bags"));
+                    }
+                } else if (queryNumber == 4) {
+                    while (answer.next()) {
+                        System.out.println(answer.getInt("passenger_id")
+                                + " ".repeat(colLengths[0] - String.valueOf(answer.getInt("passenger_id")).length())
+                                + "\t"
+                                + answer.getString("first_name")
+                                + " ".repeat(colLengths[1] - answer.getString("first_name").length()) + "\t"
+                                + answer.getString("last_name"));
                     }
                 }
-                else if (queryNumber == 4){
-                    while (answer.next()){
-                        System.out.println(answer.getInt("passenger_id") 
-                        + " ".repeat(colLengths[0] - String.valueOf(answer.getInt("passenger_id")).length()) + "\t"
-                                    + answer.getString("first_name") 
-                        + " ".repeat(colLengths[1] - answer.getString("first_name").length()) + "\t"
-                        + answer.getString("last_name"));
-                    }
-                }
+
             }
             dbConn.commit();
             System.out.println();
@@ -895,14 +903,8 @@ public class Frontend {
 
     /**
      * Takes the scanner input and the months of EITHER JUNE OR MARCH ONLY and asks
-     * <<<<<<< HEAD
      * the user for a date in each respective month until a valid date is inputed.
-     * 
-     * =======
-     * the user
-     * for a date in each respective month until a valid date is inputed.
      *
-     * >>>>>>> main
      * 
      * @param input the Scanner object used to read user input
      * @param month the months of either march or june to validate
