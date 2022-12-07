@@ -1,3 +1,4 @@
+
 /**
  * export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${PWD}
  */
@@ -294,7 +295,7 @@ public class Frontend {
      * side of the Database
      * 
      * @param input  A Scanner Object used to take user input
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void editDatabase(Scanner input, Connection dbConn) {
         String ans = "";
@@ -326,7 +327,7 @@ public class Frontend {
      * from the database.
      * 
      * @param input  A Scanner Object used to take user input
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void editPassengerInfo(Scanner input, Connection dbConn) {
         String ans = "";
@@ -357,7 +358,7 @@ public class Frontend {
      * flight
      * 
      * @param input  A Scanner Object used to take user input
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void editFlightInfo(Scanner input, Connection dbConn) {
         String ans = "";
@@ -385,8 +386,8 @@ public class Frontend {
 
     /**
      * 
-     * @param input
-     * @param dbConn
+     * @param input A Scanner Object used to take user input
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void editStaffInfo(Scanner input, Connection dbConn) {
         String ans = "";
@@ -436,27 +437,29 @@ public class Frontend {
 
     /**
      * Method to handle user adding staff members to the database
-     * @param input
-     * @param dbConn
+     * 
+     * @param input A Scanner Object used to take user input
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void addStaffMember(Scanner input, Connection dbConn) {
         // role ID is an int so restrict it
-        String[] fields = {"role_id", "first_name", "last_name", "address", "phone_number", "email", "salary"};
+        String[] fields = { "role_id", "first_name", "last_name", "address", "phone_number", "email", "salary" };
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
         HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
         for (int i = 0; i < fields.length; i++) {
             String field = fields[i];
-            if (field.equals("role_id")){
+            if (field.equals("role_id")) {
                 while (true) {
                     System.out.println("Enter a role id. (1-5)");
                     System.out.print(">: ");
                     String val = input.nextLine().trim();
                     if (val.equals("exit")) {
                         return;
-                    } else if (val.equals("1") || val.equals("2") || val.equals("3") || val.equals("4") || val.equals("5")) {
-                        int_parameters.put(i+1, Integer.parseInt(val));
+                    } else if (val.equals("1") || val.equals("2") || val.equals("3") || val.equals("4")
+                            || val.equals("5")) {
+                        int_parameters.put(i + 1, Integer.parseInt(val));
                         break;
-                    } 
+                    }
                     System.out.println("Enter an Integer from 1-5");
                 }
             } else {
@@ -466,7 +469,7 @@ public class Frontend {
                 if (val.equals("exit")) {
                     return;
                 }
-                string_parameters.put(i+1, val);
+                string_parameters.put(i + 1, val);
             }
         }
         String query = "insert into staff_member (role_id, first_name, last_name, address, phone_number, email, salary) values (?,?,?,?,?,?,?)";
@@ -475,12 +478,12 @@ public class Frontend {
 
     /**
      * 
-     * @param input
-     * @param dbConn
-     * @param staffID
+     * @param input A Scanner Object used to take user input
+     * @param dbConn  the database connection used to send and recieve queries.
+     * @param staffID Staff Id we are trying to change
      */
     private static void updateStaffMember(Scanner input, Connection dbConn, int staffID) {
-        String[] fields = {"role_id", "first_name", "last_name", "address", "phone_number", "email", "salary"};
+        String[] fields = { "role_id", "first_name", "last_name", "address", "phone_number", "email", "salary" };
         int toChange = -1;
         while (true) {
             System.out.println("What field would you like to update?");
@@ -511,13 +514,13 @@ public class Frontend {
         HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
         String val = "";
         while (true) {
-            System.out.printf("Enter the new value for %s that you would like to change.\n", fields[toChange-1]);
+            System.out.printf("Enter the new value for %s that you would like to change.\n", fields[toChange - 1]);
             System.out.print(">: ");
             val = input.nextLine().trim();
             if (val.equals("exit")) {
                 return;
-            // if they want to change role id we have to sanitize 
-            } else if (toChange == 1) { 
+                // if they want to change role id we have to sanitize
+            } else if (toChange == 1) {
                 if (val.equals("1") || val.equals("2") || val.equals("3") || val.equals("4") || val.equals("5")) {
                     int_parameters.put(1, Integer.parseInt(val));
                     break;
@@ -536,30 +539,31 @@ public class Frontend {
 
     /**
      * 
-     * @param input
-     * @param dbConn
-     * @param staffID
+     * @param input A Scanner Object used to take user input
+     * @param dbConn  the database connection used to send and recieve queries.
+     * @param staffID Staff Id we are trying to change
      */
     private static void deleteStaffMember(Scanner input, Connection dbConn, int staffID) {
-        String[] tables = {"staff_member", "staff_trip"};
+        String[] tables = { "staff_member", "staff_trip" };
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
         HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
-        int_parameters.put(1,staffID);
+        int_parameters.put(1, staffID);
         for (int i = 0; i < tables.length; i++) {
             String query = String.format("delete from %s where staff_member_id = ?", tables[i]);
             executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
         }
-    }   
+    }
 
     /**
      * Adds a flight to the flight table using user input representing the different
      * fields in the flight table.
      * 
      * @param input  A Scanner Object used to take user input
-     * @param dbConn
+     * @param dbConn The database connection used to send and recieve queries.
      */
     private static void addFlight(Scanner input, Connection dbConn) {
-        String[] fields = { "boarding_time", "departing_time", "boarding_gate", "duration", "origin", "destination", "airline_id" };
+        String[] fields = { "boarding_time", "departing_time", "boarding_gate", "duration", "origin", "destination",
+                "airline_id" };
         long boarding_time = -1;
         long departing_time = -1;
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
@@ -621,8 +625,7 @@ public class Frontend {
      * Method for taking and validating user input pertaining to time slots. Takes
      * year, month, day, hour, and
      * minute and checks if inputs are valid. returns a long representation of the
-     * java sql timestamp value
-     * of a string value of a date.
+     * java sql timestamp value of a string value of a date.
      * 
      * @param input A Scanner Object used to take user input s
      * @return returns a long representing a dateTime.
@@ -709,7 +712,7 @@ public class Frontend {
      * questions.
      * 
      * @param input  A Scanner Object used to take user input
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void updateFlightInfo(Scanner input, Connection dbConn) {
         int flight_ID = -1;
@@ -771,9 +774,10 @@ public class Frontend {
      * Allows the user to change the staff on a flight via staff_trip
      * 
      * @param input     A Scanner Object used to take user input
-     * @param dbConn
-     * @param flight_id
-     * @param remove
+     * @param dbConn    the database connection used to send and recieve queries.
+     * @param flight_id The flight id of the flight we are trying to change
+     * @param remove    Boolean value indicating whether we are supposed to remove
+     *                  or add staff
      */
     private static void changeStaffFromFlight(Scanner input, Connection dbConn, int flight_id, Boolean remove) {
         int staffId = -1;
@@ -825,9 +829,9 @@ public class Frontend {
      * FlightId
      * 
      * @param input     A Scanner Object used to take user input
-     * @param dbConn
-     * @param toChange
-     * @param flight_id
+     * @param dbConn    the database connection used to send and recieve queries.
+     * @param toChange  The field we are trying to change
+     * @param flight_id The flight id of the flight we are trying to change
      */
     private static void changeFlightTable(Scanner input, Connection dbConn, int toChange, int flight_id) {
         String[] fields = { "boarding_Gate", "boarding_time", "departing_time", "duration", "origin", "destination" };
@@ -919,7 +923,7 @@ public class Frontend {
      * Allows the user to delete a flight from flight table
      * 
      * @param input  A Scanner Object used to take user input
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void deleteFlight(Scanner input, Connection dbConn) {
         int flight_id = -1;
@@ -947,7 +951,7 @@ public class Frontend {
      * takes user input about a new passenger and adds it to the database.
      * 
      * @param input  A Scanner Object used to take user input
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void addPassenger(Scanner input, Connection dbConn) {
         String[] fields = { "email", "phone_number", "address", "first_name", "last_name" };
@@ -974,13 +978,12 @@ public class Frontend {
 
     /**
      * Method for taking in user input and allowing them to update fields in the
-     * passenger side of the DB
-     * including fields from the passenger Table, Passenger benefits, number of
-     * bags, the flights they take,
-     * and the food/drink that they have
+     * passenger side of the DB including fields from the passenger Table,
+     * Passenger benefits, number of bags, the flights they take, and the food/drink
+     * that they have
      * 
      * @param input  A Scanner Object used to take user input
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void updatePassengerInfo(Scanner input, Connection dbConn) {
         int toChange = -1;
@@ -1058,8 +1061,8 @@ public class Frontend {
      * their trips.
      * 
      * @param input  A Scanner Object used to take user input
-     * @param id
-     * @param dbConn
+     * @param id     The id of the passenger
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void changePassengerFood(Scanner input, int id, Connection dbConn) {
         int flight_id = validatePassengerOnFlight(input, id, dbConn);
@@ -1093,13 +1096,12 @@ public class Frontend {
 
     /**
      * Allows the user to update passenger info in realation to adding/removing
-     * flights from the
-     * database. When adding flights, checks if the passenger has the same boarding
-     * date before adding.
+     * flights from the todatabase. When adding flights, checks if the passenger
+     * has the same boarding date before adding.
      * 
      * @param input  A Scanner Object used to take user input
      * @param id
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void changePassengerFlights(Scanner input, int id, Connection dbConn) {
         String ret = "";
@@ -1190,12 +1192,11 @@ public class Frontend {
 
     /**
      * Takes user input of a flight number and returns that flight number if the
-     * passenger is
-     * on that flight and if that flight_id is valid.
+     * passenger is on that flight and if that flight_id is valid.
      * 
      * @param input  A Scanner Object used to take user input
      * @param id     Passenger_id
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      * @return
      */
     private static int validatePassengerOnFlight(Scanner input, int id, Connection dbConn) {
@@ -1230,13 +1231,12 @@ public class Frontend {
     /**
      * This method allows the user to change the number of bags a passenger has on a
      * flight. Takes into account if the flight is real, if the passenger is on that
-     * flight,
-     * and if the passenger is a student(allowed 1 more bag). Changes num_bags field
-     * in passenger_trip.
+     * flight, and if the passenger is a student(allowed 1 more bag).
+     * Changes num_bags field in passenger_trip.
      * 
      * @param input  A Scanner Object used to take user input
      * @param id     Passenger id
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void changeNumBags(Scanner input, int id, Connection dbConn) {
         int flight_ID = validatePassengerOnFlight(input, id, dbConn);
@@ -1289,7 +1289,7 @@ public class Frontend {
      *               based on the passenger_id
      *               and benefit_id. Sanity checks benefit_id to make sure it is in
      *               bounds.
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void changeBenefits(Scanner input, Boolean remove, int id, Connection dbConn) {
         int benefit_id = -1;
@@ -1360,7 +1360,8 @@ public class Frontend {
      * Executes the query with a prepared statement to avoid sql injection entirely
      * 
      * @param query             The query to be executed
-     * @param dbConn            The connection to the database
+     * @param dbConn            the database connection used to send and recieve
+     *                          queries.
      * @param string_parameters A hashmap of the string parameters to be inserted
      *                          into the query
      * @param int_parameters    A hashmap of the int parameters to be inserted into
@@ -1411,14 +1412,18 @@ public class Frontend {
 
     /**
      * Polymorphic method but takes in a prepared statement, used for queries that
-     * include
-     * special SQL date fields.
+     * include special SQL date fields.
      * 
-     * @param statement
-     * @param dbConn
-     * @param string_parameters
-     * @param int_parameters
-     * @param queryNumber
+     * @param statement         a Prepared statenemnt that is used to execute
+     *                          queries via dbConn
+     * @param dbConn            the database connection used to send and recieve
+     *                          queries.
+     * @param string_parameters A HashMap<Integer, String> of string parameters in
+     *                          statement
+     * @param int_parameters    A HashMap<Integer, Integer> of integer parameters in
+     *                          statement
+     * @param queryNumber       The query number used to signal what query we
+     *                          execute
      */
     private static void executeProtectedQuery(PreparedStatement statement, Connection dbConn,
             HashMap<Integer, String> string_parameters, HashMap<Integer, Integer> int_parameters, int queryNumber) {
@@ -1467,7 +1472,7 @@ public class Frontend {
      * passenger across all tables
      * 
      * @param input  A Scanner Object used to take user input
-     * @param dbConn
+     * @param dbConn the database connection used to send and recieve queries.
      */
     private static void deletePassengerInfo(Scanner input, Connection dbConn) {
         int idNum = -1;
@@ -1497,7 +1502,7 @@ public class Frontend {
      * (Influenced by Proffessor McCanns JDBC.java)
      *
      * @param query    The query string we wish to execute
-     * @param dbonn    the Connection to the database and how we send quaries
+     * @param dbConn   the Connection to the database and how we send quaries
      * @param queryNum The number query that we wish to execute (1-3)
      */
     private static void executeQuery(String query, Connection dbConn, int queryNumber) {
@@ -1612,11 +1617,13 @@ public class Frontend {
                 "QUERY 1: Display the list of distinct passenger names, who took flights from all four airlines in the year 2021.\n");
         System.out.printf("QUERY 2: %s\n", query2);
         System.out.printf("QUERY 3: %s\n", query3);
-        // TODO: Chose the 3rd Category of our choice and airline to query
-        System.out.println("QUERY 4: Displays the a list of Students, Frequent Flyers, and ____ for ____ who: ");
+        System.out.println(
+                "QUERY 4: Displays the a list of Students, Frequent Flyers, and Priority Boarding for United Airlines who: ");
         System.out.println("         1.) Traveled only once in the month of March.");
         System.out.println(
                 "         2.) Traveled with exactly one checked in bag anytime in the months of June aand July.");
         System.out.println("         3.) Ordered snacks/beverages on at least one flight.\n");
+        System.out.println(
+                "QUERY 5: For each airline, list the passenger that has had the most flights on that airline that is not a frequent flyer.");
     }
 }
