@@ -1,4 +1,3 @@
-
 /**
  * Frontend.java
  * 
@@ -137,6 +136,12 @@ public class Frontend {
         }
     }
 
+    /**
+     * Display the list of distinct passenger names, who took flights from all four
+     * airlines in the year 2021
+     * 
+     * @param dbConn the database connection used to send and recieve queries.
+     */
     private static void query1Handler(Connection dbConn) {
         String query = "SELECT DISTINCT first_name, last_name " +
                 "FROM Passenger passenger INNER JOIN Passenger_trip passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id "
@@ -147,6 +152,16 @@ public class Frontend {
         executeQuery(query, dbConn, 1);
     }
 
+    /**
+     * For any airline entered by the user, print the list of passengers, with the
+     * number of checked–in bags. Sort
+     * the list in ascending order of the number of checked–in bags. Display the
+     * output grouped by flights for
+     * a particular date in March (input by the user).
+     * 
+     * @param input  Scanner to read user input
+     * @param dbConn the database connection used to send and recieve queries.
+     */
     private static void query2Handler(Scanner input, Connection dbConn) {
         String date = validateDate(input, "march");
         if (date == null) {
@@ -181,14 +196,26 @@ public class Frontend {
         executeProtectedQuery(query, dbConn, string_parameters, int_parameters, 2);
     }
 
+    /**
+     * Print the schedule of flights for a given date in June (input by the user).
+     * The schedule should contain the
+     * flight number, gate number, name of the airline of that flight, boarding
+     * time, departing time, duration
+     * of flight, route of the flight (i.e. origin for arriving flights and
+     * destination for the departing flights). Sort
+     * the schedule in ascending order of the boarding time
+     * 
+     * @param input  Scanner to read user input
+     * @param dbConn the database connection used to send and recieve queries.
+     */
     private static void query3Handler(Scanner input, Connection dbConn) {
         String query = "SELECT DISTINCT flight_id, boarding_gate, name, boarding_time, departing_time, duration, origin, destination  "
                 +
-                "FROM Flight JOIN Airline USING (airline_id) " 
+                "FROM Flight JOIN Airline USING (airline_id) "
                 +
                 " WHERE EXTRACT(MONTH FROM Flight.boarding_time) = 6 AND "
                 +
-                "EXTRACT(DAY FROM Flight.boarding_time) = ? " + 
+                "EXTRACT(DAY FROM Flight.boarding_time) = ? " +
                 "ORDER BY Flight.boarding_time";
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
         HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
@@ -1578,7 +1605,7 @@ public class Frontend {
             answer = stmt.executeQuery(query);
             // The lengths of each of the column names for formatting purposes
             int[] colLengths;
-            if (answer != null) {
+            if (answer != null && queryNumber >= 0) {
                 // Get the data about the query result to learn
                 // the attribute names and use them as column headers
                 ResultSetMetaData answermetadata = answer.getMetaData();
@@ -1630,16 +1657,9 @@ public class Frontend {
                         System.out.println();
                     }
                 }
-
-                else {
-
-                }
-                // Use next() to advance cursor through the result
-                // tuples and print their attribute values
-                // TODO: parse answers here
+                System.out.println();
             }
             dbConn.commit();
-            System.out.println();
             stmt.close();
         } catch (SQLException e) {
             System.err.println("*** SQLException:  "
@@ -1723,6 +1743,6 @@ public class Frontend {
                 "         2.) Traveled with exactly one checked in bag anytime in the months of June aand July.");
         System.out.println("         3.) Ordered snacks/beverages on at least one flight.\n");
         System.out.println(
-                "QUERY 5: For each airline, list the passenger that has had the most flights on that airline that is not a frequent flyer.");
+                "QUERY 5: For each airline, list the passenger that has had the most flights on that airline that is not a frequent flyer.\n");
     }
 }
