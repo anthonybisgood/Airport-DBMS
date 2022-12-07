@@ -28,7 +28,7 @@ public class DataBasePopulator {
             Connection dbconn = null;
 
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
 
                 // creates passenger table
@@ -136,7 +136,7 @@ public class DataBasePopulator {
             Connection dbconn = null;
 
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
             } catch (Exception e) {
                 System.out.println(e);
@@ -150,7 +150,7 @@ public class DataBasePopulator {
                     "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
             Connection dbconn = null;
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
             } catch (Exception e) {
                 System.out.println(e);
@@ -177,7 +177,7 @@ public class DataBasePopulator {
                     "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
             Connection dbconn = null;
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
                 for (int i = 0; i < 30; i++) {
                     PreparedStatement sql = dbconn.prepareStatement(
@@ -199,7 +199,7 @@ public class DataBasePopulator {
             Connection dbconn = null;
 
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
                 Statement stmt = dbconn.createStatement(); // statement for the dbconnection
                 ResultSet answer = stmt.executeQuery("select passenger_id from passenger");
@@ -235,7 +235,7 @@ public class DataBasePopulator {
             Connection dbconn = null;
 
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
                 Statement stmt = dbconn.createStatement(); // statement for the dbconnection
                 ResultSet answer = stmt.executeQuery("select passenger_id from passenger");
@@ -289,7 +289,7 @@ public class DataBasePopulator {
                     "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
             Connection dbconn = null;
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
                 Statement stmt = dbconn.createStatement(); // statement for the dbconnection
                 ResultSet answer = stmt.executeQuery("select occupation_id from role");
@@ -318,7 +318,7 @@ public class DataBasePopulator {
                     "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
             Connection dbconn = null;
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
                 Random rand = new Random();
 
@@ -369,7 +369,7 @@ public class DataBasePopulator {
                     "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
             Connection dbconn = null;
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
                 Statement stmt = dbconn.createStatement();
 
@@ -411,7 +411,7 @@ public class DataBasePopulator {
                     "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
             Connection dbconn = null;
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
                 Statement stmt = dbconn.createStatement();
                 ResultSet answer = stmt.executeQuery("select sequence_name from user_sequences");
@@ -459,7 +459,7 @@ public class DataBasePopulator {
                     "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
             Connection dbconn = null;
             try {
-                dbconn = DriverManager.getConnection(oracleURL, "varuns1", "a1222");
+                dbconn = DriverManager.getConnection(oracleURL, "jessegomez", "a3377");
                 dbconn.setAutoCommit(false);
                 Statement stmt = dbconn.createStatement();
                 for (int i = 0; i < tables.size(); i++) {

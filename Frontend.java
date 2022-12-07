@@ -122,8 +122,10 @@ public class Frontend {
 
     private static void query1Handler(Connection dbConn) {
         String query = "SELECT DISTINCT first_name, last_name " +
-                "FROM Passenger INNER JOIN Passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id " +
-                "WHERE 4 IN (SELECT COUNT(DISTINCT airline_id) FROM Flight WHERE Flight.flight_id = Passenger_trip.flight_id)";
+        "FROM Jessegomez.Passenger passenger INNER JOIN Jessegomez.Passenger_trip passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id " +
+        "Inner JOIN Jessegomez.Flight ptfj ON Passenger_trip.flight_id = ptfj.flight_id " +
+        "GROUP BY first_name, last_name " +
+        "HAVING COUNT(DISTINCT airline_id) = 4";;
         executeQuery(query, dbConn, 1);
     }
 
@@ -344,7 +346,7 @@ public class Frontend {
         }
         if (ans.equals("1")) {
             addPassenger(input, dbConn);
-        } else if (ans.equals("2")) {
+        } else if (ans.equals("2")) { 
             updatePassengerInfo(input, dbConn);
         } else if (ans.equals("3")) {
             deletePassengerInfo(input, dbConn);
