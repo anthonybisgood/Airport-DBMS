@@ -166,7 +166,8 @@ public class Frontend {
                 +
                 "FROM Flight WHERE EXTRACT(MONTH FROM Flight.boarding_time) = 6 AND "
                 +
-                "EXTRACT(DAY FROM Flight.boarding_time) = ?";
+                "EXTRACT(DAY FROM Flight.boarding_time) = ? " + 
+                "ORDER BY Flight.boarding_time";
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
         HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
         String month = validateDate(input, "june");
