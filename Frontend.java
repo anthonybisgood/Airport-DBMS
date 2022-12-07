@@ -125,8 +125,10 @@ public class Frontend {
 
     private static void query1Handler(Connection dbConn) {
         String query = "SELECT DISTINCT first_name, last_name " +
-                "FROM Passenger INNER JOIN Passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id " +
-                "WHERE 4 IN (SELECT COUNT(DISTINCT airline_id) FROM Flight WHERE Flight.flight_id = Passenger_trip.flight_id)";
+        "FROM Passenger passenger INNER JOIN Passenger_trip passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id " +
+        "Inner JOIN Flight ptfj ON Passenger_trip.flight_id = ptfj.flight_id " +
+        "GROUP BY first_name, last_name " +
+        "HAVING COUNT(DISTINCT airline_id) = 4";
         executeQuery(query, dbConn, 1);
     }
 
