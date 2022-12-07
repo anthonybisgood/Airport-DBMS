@@ -30,4 +30,11 @@ To run DataBasePopulator application:
 <ol>
 <li>export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${PWD} </li>
 <li>javac DataBasePopulator.java </li>
-<li>java DataBasePopulator</li> <ol>
+<li>java DataBasePopulator</li> </ol>
+
+Anthony Bisgood:
+<ol>
+<li> Query 2 </li>
+<li> Ability for user to add, update or delete a passenger and their details, including the passenger’s history. </li>
+<li> Ability for user to insert, update or delete flights, staff and their details. </li> </ol>
+
