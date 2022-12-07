@@ -38,3 +38,9 @@ Anthony Bisgood:
 <li> Ability for user to add, update or delete a passenger and their details, including the passenger’s history. </li>
 <li> Ability for user to insert, update or delete flights, staff and their details. </li> </ol>
 
+Jesse Gomez:
+<ol>
+<li> Query 1 and 3 </li>
+<li> Relational schema diagram </li>
+<li> Functional Dependencies </li>
+
