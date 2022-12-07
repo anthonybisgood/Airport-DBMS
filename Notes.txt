@@ -9,3 +9,7 @@ select PassengerID, NumBags
 from PassengerTrip join Flight on (flightID)
 where extract(DAY from Flight.BoardingTime) = %d and 
 extract(MONTH from Flight.BoardingTime) = 3
+
+
+// to get the days and passengerIDs airline ids of flights in march
+select extract(day from boarding_time), airline_id from passenger_trip join flight using (flight_id) where extract(Month from boarding_time) = 3;
