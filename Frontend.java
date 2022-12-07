@@ -109,7 +109,7 @@ public class Frontend {
             } else if (value.equals("4")) {
                 query4Handler(dbConn);
             } else if (value.equals("5")) {
-                query5Handler(input, dbConn);
+                query5Handler(dbConn);
             } else if (value.equals("rc")) {
                 editDatabase(input, dbConn);
             } else {
@@ -213,10 +213,10 @@ public class Frontend {
                     // Ensure that we only get results that have one of these records
                     + "GROUP BY pngrvalid.passenger_id, pngrvalid.first_name, pngrvalid.last_name "
                     + "HAVING COUNT(pngrvalid.passenger_id)=1";
-
-            System.out.println("\nDisplaying results for " + passengerType + " passengers who flew " +
-                    "only once in the month of March");
-            System.out.println("----------------------------------");
+	        String prntMsg = "\nDisplaying results for " + passengerType + " passengers who flew " +
+                "only once in the month of March";
+	        System.out.println(prntMsg);
+            System.out.println("-".repeat(prntMsg.length()));
 
 
             executeQuery(query, dbConn, 4);
@@ -236,9 +236,10 @@ public class Frontend {
                     + "AND flight.departing_time > " + juneStart + " "
                     + "AND flight.departing_time < " + julEnd;
 
-            System.out.println("\nDisplaying results for " + passengerType + " passengers" +
-                    " who traveled with exactly one checked bag in the months of June or July");
-            System.out.println("----------------------------------");
+            prntMsg = "\nDisplaying results for " + passengerType + " passengers" +
+                    " who traveled with exactly one checked bag in the months of June or July";
+	        System.out.println(prntMsg);
+            System.out.println("-".repeat(prntMsg.length()));
             executeQuery(query, dbConn, 4);
 
             // Ordered snacks/beverages query at least once
@@ -250,16 +251,53 @@ public class Frontend {
                     + "WHERE airline.name=" + airline
                     + "AND passenger_trip.num_items_purchased > 0";
 
-            System.out.println("\nDisplaying results for " + passengerType + " passengers" +
-                    " who ordered beverages at least once on a flight");
-            System.out.println("----------------------------------");
+            prntMsg = "\nDisplaying results for " + passengerType + " passengers" +
+                    " who ordered beverages at least once on a flight";
+	        System.out.println(prntMsg);
+            System.out.println("-".repeat(prntMsg.length()));
             executeQuery(query,dbConn, 4);
         }
 
     }
 
-    private static void query5Handler(Scanner input, Connection dbConn) {
-
+    /* Purpose: Performs the following custom query:
+     * For each distinct airline, lists the passenger that had the most
+     * flights on that airline if they are not a frequent flyer. Any airlines
+     * that have no passengers that meet this criteria will not be displayed.
+     * If there are any ties for the most trips between passengers, all passengers
+     * involved in the tie will be displayed.
+     * Creates the queries and has calls executeQuery on them.
+     *
+     * Parameters:
+     *  dbConn: The current connection to the database
+     *
+     * Returns: Nothing
+     */
+    private static void query5Handler(Connection dbConn) {
+        String query = "WITH airlineCounts as (SELECT airline.airline_id, airline.name, passenger.passenger_id, " +
+                "passenger.first_name, passenger.last_name, COUNT(*) tripcount " +
+                "FROM airline " +
+                "JOIN flight ON airline.airline_id=flight.airline_id " +
+                "JOIN passenger_trip ON flight.flight_id=passenger_trip.flight_id " +
+                "JOIN passenger ON passenger_trip.passenger_id=passenger.passenger_id " +
+                "JOIN passenger_benefit ON passenger.passenger_id=passenger_benefit.passenger_id " +
+                "JOIN benefit ON passenger_benefit.benefit_id=benefit.benefit_id " +
+                "WHERE benefit.category<>'frequentflyer' " +
+                "GROUP BY airline.airline_id, airline.name, passenger.passenger_id, passenger.first_name, passenger.last_name " +
+                ") " +
+                "SELECT airlineCounts.name \"Airline Name\", airlineCounts.passenger_id \"Passenger ID\", " +
+                "airlineCounts.first_name \"First Name\", airlineCounts.last_name \"Last Name\", airlineCounts.tripcount \"Trip Count\"" +
+                "FROM airlineCounts " +
+                "JOIN " +
+                "( " +
+                "SELECT airlineCounts.airline_id, MAX(airlineCounts.tripcount) maxtripcount " +
+                "FROM airlineCounts " +
+                "GROUP BY airlineCounts.airline_id " +
+                ") countsJoined ON airlineCounts.airline_id=countsJoined.airline_id AND countsJoined.maxtripcount=airlineCounts.tripcount " +
+                "ORDER BY airlineCounts.airline_id";
+	    System.out.println("Printing passengers with most trips per airline who are not frequent flyers.");
+	    System.out.println("----------------------------------------------------------------------------");
+        executeQuery(query, dbConn, 5);
     }
 
     /**
@@ -656,43 +694,70 @@ public class Frontend {
             answer = stmt.executeQuery(query);
 	    // The lengths of each of the column names for formatting purposes
 	    int[] colLengths;
-            if (answer != null) {
-                // Get the data about the query result to learn
-                // the attribute names and use them as column headers
-                ResultSetMetaData answermetadata = answer.getMetaData();
-		colLengths = new int[answermetadata.getColumnCount()];
-                for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
-                    System.out.print(answermetadata.getColumnName(i) + "\t");
-		    colLengths[i - 1] = answermetadata.getColumnName(i).length();
+        if (answer != null) {
+            // Get the data about the query result to learn
+            // the attribute names and use them as column headers
+            ResultSetMetaData answermetadata = answer.getMetaData();
+		    colLengths = new int[answermetadata.getColumnCount()];
+            for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
+                System.out.print(answermetadata.getColumnName(i) + "\t");
+                colLengths[i - 1] = answermetadata.getColumnName(i).length();
+            }
+		    System.out.println();
+            if (queryNumber == 2) {
+                while (answer.next()) {
+                    System.out.println(answer.getString("Passenger_ID") + "\t"
+                    + answer.getInt("num_bags"));
                 }
-		System.out.println();
-                if (queryNumber == 2) {
-                    while (answer.next()) {
-                        System.out.println(answer.getString("Passenger_ID") + "\t"
-                        + answer.getInt("num_bags"));
-                    }
+            }
+            else if (queryNumber == 4){
+		        String[] vals = new String[3];
+		        int[] repeats = new int[3];
+                while (answer.next()){
+		    	    vals[0] = String.valueOf(answer.getInt("passenger_id"));
+			        vals[1] = answer.getString("first_name");
+			        vals[2] = answer.getString("last_name");
+			        for (int i = 0; i < vals.length; i++){
+				        repeats[i] = colLengths[i] - vals[i].length();
+				            if (repeats[i] < 0){
+					            repeats[i] = 0;
+				            }
+				        System.out.print(vals[i] + " ".repeat(repeats[i]) + "\t");
+			        }
+			        System.out.println();
                 }
+            }
 
-                else if (queryNumber == 4){
-                    while (answer.next()){
-                        System.out.println(answer.getInt("passenger_id") 
-			+ " ".repeat(colLengths[0] - String.valueOf(answer.getInt("passenger_id")).length()) + "\t"
-                        + answer.getString("first_name") 
-			+ " ".repeat(colLengths[1] - answer.getString("first_name").length()) + "\t"
-                        + answer.getString("last_name"));
+            else if (queryNumber == 5){
+		        String[] vals = new String[5];
+		        int[] repeats = new int[5];
+                while (answer.next()){
+                    vals[0] = answer.getString("Airline Name");
+                    vals[1] = String.valueOf(answer.getInt("Passenger ID"));
+                    vals[2] = answer.getString("First Name");
+                    vals[3] = answer.getString("Last Name");
+                    vals[4] = String.valueOf(answer.getInt("Trip Count"));
+			        for (int i = 0; i < vals.length; i++){
+                        repeats[i] = colLengths[i] - vals[i].length();
+                        if (repeats[i] < 0){
+                            repeats[i] = 0;
+                        }
+                        System.out.print(vals[i] + " ".repeat(repeats[i]) + "\t");
                     }
+			        System.out.println();
                 }
+            }
 
-                else {
+            else{
 
                 }
                 // Use next() to advance cursor through the result
                 // tuples and print their attribute values
                 // TODO: parse answers here
-            }
-            dbConn.commit();
-            System.out.println();
-            stmt.close();
+        }
+        dbConn.commit();
+        System.out.println();
+        stmt.close();
         } catch (SQLException e) {
             System.err.println("*** SQLException:  "
                     + "Could not fetch query results.");
