@@ -1,4 +1,3 @@
-
 /**
  * export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${PWD}
  */
@@ -294,19 +293,20 @@ public class Frontend {
      * Method for sending the user to either change the airline side of passenger
      * side of the Database
      * 
-     * @param input
+     * @param input  A Scanner Object used to take user input
      * @param dbConn
      */
     private static void editDatabase(Scanner input, Connection dbConn) {
         String ans = "";
         while (true) {
-            System.out.println("Type '1' to edit passenger info, '2' for flight info, or 'exit' to quit");
+            System.out.println(
+                    "Type '1' to edit passenger info, '2' for flight info, '3' for staff info, or 'exit' to quit");
             System.out.print(">: ");
             ans = input.nextLine().trim();
             if (ans.equals("exit")) {
                 return;
             }
-            if (ans.equals("1") || ans.equals("2")) {
+            if (ans.equals("1") || ans.equals("2") || ans.equals("3")) {
                 break;
             } else {
                 System.out.println("Please enter a valid query.");
@@ -316,6 +316,8 @@ public class Frontend {
             editPassengerInfo(input, dbConn);
         } else if (ans.equals("2")) {
             editFlightInfo(input, dbConn);
+        } else if (ans.equals("3")) {
+            editStaffInfo(input, dbConn);
         }
     }
 
@@ -323,7 +325,7 @@ public class Frontend {
      * Method for taking user input on if to add, update, or delete passenger info
      * from the database.
      * 
-     * @param input
+     * @param input  A Scanner Object used to take user input
      * @param dbConn
      */
     private static void editPassengerInfo(Scanner input, Connection dbConn) {
@@ -351,8 +353,10 @@ public class Frontend {
     }
 
     /**
-     * Method for asking the user if they would like to add, update, or delete a flight
-     * @param input
+     * Method for asking the user if they would like to add, update, or delete a
+     * flight
+     * 
+     * @param input  A Scanner Object used to take user input
      * @param dbConn
      */
     private static void editFlightInfo(Scanner input, Connection dbConn) {
@@ -380,15 +384,182 @@ public class Frontend {
     }
 
     /**
-     * Adds a flight to the flight table using user input representing the different
-     * fields in the flight table.
      * 
      * @param input
      * @param dbConn
      */
+    private static void editStaffInfo(Scanner input, Connection dbConn) {
+        String ans = "";
+        while (true) {
+            System.out.println("Type '1' to add staff, '2' to update staff info, or '3' to delete a staff member");
+            System.out.print(">: ");
+            ans = input.nextLine().trim();
+            if (ans.equals("exit")) {
+                return;
+            }
+            if (ans.equals("1") || ans.equals("2") || ans.equals("3")) {
+                break;
+            } else {
+                System.out.println("Please enter a valid number.");
+            }
+        }
+        if (ans.equals("1")) {
+            addStaffMember(input, dbConn);
+        } else {
+            int staffID = -1;
+            while (true) {
+                System.out.println("Enter a staff ID number.");
+                System.out.print(">: ");
+                String val = input.nextLine().trim();
+                if (val.equals("exit")) {
+                    return;
+                }
+                try {
+                    staffID = Integer.parseInt(val);
+                } catch (NumberFormatException e) {
+                    System.out.println("Input an Integer");
+                    continue;
+                }
+                if (validateId(staffID, "staff_member", dbConn, "staff_member_id")) {
+                    break;
+                } else {
+                    System.out.println("Inputted Staff ID number is not in database");
+                }
+            }
+            if (ans.equals("2")) {
+                updateStaffMember(input, dbConn, staffID);
+            } else if (ans.equals("3")) {
+                deleteStaffMember(input, dbConn, staffID);
+            }
+        }
+    }
+
+    /**
+     * Method to handle user adding staff members to the database
+     * @param input
+     * @param dbConn
+     */
+    private static void addStaffMember(Scanner input, Connection dbConn) {
+        // role ID is an int so restrict it
+        String[] fields = {"role_id", "first_name", "last_name", "address", "phone_number", "email", "salary"};
+        HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
+        HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
+        for (int i = 0; i < fields.length; i++) {
+            String field = fields[i];
+            if (field.equals("role_id")){
+                while (true) {
+                    System.out.println("Enter a role id. (1-5)");
+                    System.out.print(">: ");
+                    String val = input.nextLine().trim();
+                    if (val.equals("exit")) {
+                        return;
+                    } else if (val.equals("1") || val.equals("2") || val.equals("3") || val.equals("4") || val.equals("5")) {
+                        int_parameters.put(i+1, Integer.parseInt(val));
+                        break;
+                    } 
+                    System.out.println("Enter an Integer from 1-5");
+                }
+            } else {
+                System.out.printf("Enter a new %s.\n", fields[i]);
+                System.out.print(">: ");
+                String val = input.nextLine().trim();
+                if (val.equals("exit")) {
+                    return;
+                }
+                string_parameters.put(i+1, val);
+            }
+        }
+        String query = "insert into staff_member (role_id, first_name, last_name, address, phone_number, email, salary) values (?,?,?,?,?,?,?)";
+        executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
+    }
+
+    /**
+     * 
+     * @param input
+     * @param dbConn
+     * @param staffID
+     */
+    private static void updateStaffMember(Scanner input, Connection dbConn, int staffID) {
+        String[] fields = {"role_id", "first_name", "last_name", "address", "phone_number", "email", "salary"};
+        int toChange = -1;
+        while (true) {
+            System.out.println("What field would you like to update?");
+            System.out.println("    Type '1' to change roleID");
+            System.out.println("    Type '2' to change First Name");
+            System.out.println("    Type '3' to change Last Name");
+            System.out.println("    Type '4' to change Address");
+            System.out.println("    Type '5' to change Phone Number");
+            System.out.println("    Type '6' to change email");
+            System.out.println("    Type '7' to change salary");
+            System.out.print(">: ");
+            String ans = input.nextLine().trim();
+            if (ans.equals("exit")) {
+                return;
+            }
+            // validate user input is an integer and within bounds
+            try {
+                toChange = Integer.parseInt(ans);
+                if (toChange > 0 && toChange < 8) {
+                    break;
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter an Integer.");
+            }
+            System.out.println("Please enter a valid integer (1-7).");
+        }
+        HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
+        HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
+        String val = "";
+        while (true) {
+            System.out.printf("Enter the new value for %s that you would like to change.\n", fields[toChange-1]);
+            System.out.print(">: ");
+            val = input.nextLine().trim();
+            if (val.equals("exit")) {
+                return;
+            // if they want to change role id we have to sanitize 
+            } else if (toChange == 1) { 
+                if (val.equals("1") || val.equals("2") || val.equals("3") || val.equals("4") || val.equals("5")) {
+                    int_parameters.put(1, Integer.parseInt(val));
+                    break;
+                } else {
+                    System.out.println("Enter an Integer from 1-5");
+                }
+            } else {
+                string_parameters.put(1, val);
+                break;
+            }
+        }
+        int_parameters.put(2, staffID);
+        String query = String.format("UPDATE staff_member SET %s = ? where staff_member_id = ?", fields[toChange - 1]);
+        executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
+    }
+
+    /**
+     * 
+     * @param input
+     * @param dbConn
+     * @param staffID
+     */
+    private static void deleteStaffMember(Scanner input, Connection dbConn, int staffID) {
+        String[] tables = {"staff_member", "staff_trip"};
+        HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
+        HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
+        int_parameters.put(1,staffID);
+        for (int i = 0; i < tables.length; i++) {
+            String query = String.format("delete from %s where staff_member_id = ?", tables[i]);
+            executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
+        }
+    }   
+
+    /**
+     * Adds a flight to the flight table using user input representing the different
+     * fields in the flight table.
+     * 
+     * @param input  A Scanner Object used to take user input
+     * @param dbConn
+     */
     private static void addFlight(Scanner input, Connection dbConn) {
-        String[] fields = { "boarding_time", "departing_time", "boarding_gate", "duration", "origin", "destination",
-                "airline_id" };
+        String[] fields = { "boarding_time", "departing_time", "boarding_gate", "duration", "origin", "destination", "airline_id" };
         long boarding_time = -1;
         long departing_time = -1;
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
@@ -437,7 +608,7 @@ public class Frontend {
         }
         try {
             PreparedStatement sql = dbConn.prepareStatement(
-                    "insert into flight  (boarding_time, departing_time, boarding_gate,  duration, origin, destination, airline_id) values (?,?,?,?,?,?,?)");
+                    "insert into flight  (boarding_time, departing_time, boarding_gate, duration, origin, destination, airline_id) values (?,?,?,?,?,?,?)");
             sql.setDate(1, new java.sql.Date(boarding_time));
             sql.setDate(2, new java.sql.Date(departing_time));
             executeProtectedQuery(sql, dbConn, string_parameters, int_parameters, -1);
@@ -453,7 +624,7 @@ public class Frontend {
      * java sql timestamp value
      * of a string value of a date.
      * 
-     * @param input s
+     * @param input A Scanner Object used to take user input s
      * @return returns a long representing a dateTime.
      */
     private static long takeUserDate(Scanner input) {
@@ -536,7 +707,8 @@ public class Frontend {
     /**
      * Allows the user to change certain values in flight and staff_trip tables via
      * questions.
-     * @param input
+     * 
+     * @param input  A Scanner Object used to take user input
      * @param dbConn
      */
     private static void updateFlightInfo(Scanner input, Connection dbConn) {
@@ -578,13 +750,13 @@ public class Frontend {
             // validate user input is an integer and within bounds
             try {
                 toChange = Integer.parseInt(ans);
-                if (toChange > 0 && toChange < 11) {
+                if (toChange > 0 && toChange < 9) {
                     break;
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Please enter an Integer.");
             }
-            System.out.println("Please enter a valid integer (1-10).");
+            System.out.println("Please enter a valid integer (1-8).");
         }
         if (toChange <= 6) {
             changeFlightTable(input, dbConn, toChange, flight_ID);
@@ -597,7 +769,8 @@ public class Frontend {
 
     /**
      * Allows the user to change the staff on a flight via staff_trip
-     * @param input
+     * 
+     * @param input     A Scanner Object used to take user input
      * @param dbConn
      * @param flight_id
      * @param remove
@@ -616,11 +789,12 @@ public class Frontend {
                 // check if staff member is in DB
                 if (validateId(staffId, "staff_member", dbConn, "staff_member_id")) {
                     // checks if staff member is on the fligth
-                    Boolean alreadyOn = validateId(staffId, "staff_trip", dbConn, "flight_id = " + flight_id + " and staff_member_Id");
+                    Boolean alreadyOn = validateId(staffId, "staff_trip", dbConn,
+                            "flight_id = " + flight_id + " and staff_member_Id");
                     // if the staff member we're trying to add is on the flight
                     if (alreadyOn && !remove) {
                         System.out.printf("Staff member is already on that flight, flight Id: %d\n", flight_id);
-                    // if we are trying to remove a staff member but they're not on the flight
+                        // if we are trying to remove a staff member but they're not on the flight
                     } else if (!alreadyOn && remove) {
                         System.out.printf("Staff member is not on that flight, flight Id: %d\n", flight_id);
                     } else {
@@ -644,32 +818,34 @@ public class Frontend {
             query = String.format("insert into staff_trip (flight_id, staff_member_id) values (?, ?)");
         }
         executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
-    }   
-
+    }
 
     /**
-     * Allows the user to change all fields in flight table exculding airlineID and FlightId
-     * @param input
+     * Allows the user to change all fields in flight table exculding airlineID and
+     * FlightId
+     * 
+     * @param input     A Scanner Object used to take user input
      * @param dbConn
      * @param toChange
      * @param flight_id
      */
     private static void changeFlightTable(Scanner input, Connection dbConn, int toChange, int flight_id) {
-        String[] fields = {"boarding_Gate", "boarding_time", "departing_time", "duration", "origin", "destination"};
+        String[] fields = { "boarding_Gate", "boarding_time", "departing_time", "duration", "origin", "destination" };
         String val = "";
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
         HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
-        if (toChange == 2 || toChange == 3){
+        if (toChange == 2 || toChange == 3) {
             long newTime = takeUserDate(input);
-            // check if any passenger_trip join flight has the same date that doesnt include current flight id
+            // check if any passenger_trip join flight has the same date that doesnt include
+            // current flight id
             String query = "select distinct trunc(boarding_time), passenger_id " +
-                           "from passenger_trip join flight using (flight_id) " +
-                           "where flight_id != ? and passenger_id IN (select distinct passenger_id " +
-                                                                     "from flight join passenger_trip using(flight_id) "+ 
-                                                                     "where flight_id = ?) "+
-                           "and trunc(boarding_time) = (select distinct trunc(boarding_time) "+
-                                                       "from flight	"+
-                                                       "where flight_id = ?)";
+                    "from passenger_trip join flight using (flight_id) " +
+                    "where flight_id != ? and passenger_id IN (select distinct passenger_id " +
+                    "from flight join passenger_trip using(flight_id) " +
+                    "where flight_id = ?) " +
+                    "and trunc(boarding_time) = (select distinct trunc(boarding_time) " +
+                    "from flight	" +
+                    "where flight_id = ?)";
             boolean conflicting = false;
             try {
                 PreparedStatement statement = dbConn.prepareStatement(query);
@@ -691,7 +867,7 @@ public class Frontend {
             }
             if (!conflicting) {
                 // add flight to user
-                query = String.format("UPDATE flight SET %s= ? where flight_id = ?", fields[toChange-1]);
+                query = String.format("UPDATE flight SET %s= ? where flight_id = ?", fields[toChange - 1]);
                 try {
                     PreparedStatement sql = dbConn.prepareStatement(query);
                     sql.setDate(1, new java.sql.Date(newTime));
@@ -700,16 +876,16 @@ public class Frontend {
                     executeProtectedQuery(sql, dbConn, string_parameters, int_parameters, -1);
                 } catch (SQLException e) {
                     System.err.println("*** SQLException:  "
-                    + "Could not fetch query results.");
+                            + "Could not fetch query results.");
                     System.err.println("\tMessage:   " + e.getMessage());
                     System.err.println("\tSQLState:  " + e.getSQLState());
                     System.err.println("\tErrorCode: " + e.getErrorCode());
                     System.exit(-1);
                 }
-                
+
             } else {
                 System.out.println("Cannot change flight time, conflicting passenger times.");
-            }            
+            }
         } else {
             if (toChange == 4) {
                 while (true) {
@@ -732,7 +908,7 @@ public class Frontend {
                 System.out.print(">: ");
                 val = input.nextLine().trim();
             }
-            String query = String.format("UPDATE flight SET %s = ? where flight_id = ?", fields[toChange-1]);
+            String query = String.format("UPDATE flight SET %s = ? where flight_id = ?", fields[toChange - 1]);
             string_parameters.put(1, val);
             int_parameters.put(2, flight_id);
             executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
@@ -741,7 +917,8 @@ public class Frontend {
 
     /**
      * Allows the user to delete a flight from flight table
-     * @param input
+     * 
+     * @param input  A Scanner Object used to take user input
      * @param dbConn
      */
     private static void deleteFlight(Scanner input, Connection dbConn) {
@@ -759,7 +936,7 @@ public class Frontend {
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
         HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
         int_parameters.put(1, flight_id);
-        String[] tables = {"flight", "passenger_trip", "staff_trip"};
+        String[] tables = { "flight", "passenger_trip", "staff_trip" };
         for (int i = 0; i < tables.length; i++) {
             String query = String.format("delete from %s where flight_id = ?", tables[i]);
             executeProtectedQuery(query, dbConn, string_parameters, int_parameters, -1);
@@ -769,7 +946,7 @@ public class Frontend {
     /**
      * takes user input about a new passenger and adds it to the database.
      * 
-     * @param input
+     * @param input  A Scanner Object used to take user input
      * @param dbConn
      */
     private static void addPassenger(Scanner input, Connection dbConn) {
@@ -782,8 +959,7 @@ public class Frontend {
                 System.out.printf("Input a new %s\n", fields[i]);
                 System.out.print(">: ");
                 res = input.nextLine().trim();
-                
-                if (res.equals("exit")){
+                if (res.equals("exit")) {
                     return;
                 }
                 sql.setString(i + 1, res);
@@ -803,7 +979,7 @@ public class Frontend {
      * bags, the flights they take,
      * and the food/drink that they have
      * 
-     * @param input
+     * @param input  A Scanner Object used to take user input
      * @param dbConn
      */
     private static void updatePassengerInfo(Scanner input, Connection dbConn) {
@@ -881,7 +1057,7 @@ public class Frontend {
      * Allows the user to change the amount of food a passenger has bought on one of
      * their trips.
      * 
-     * @param input
+     * @param input  A Scanner Object used to take user input
      * @param id
      * @param dbConn
      */
@@ -921,7 +1097,7 @@ public class Frontend {
      * database. When adding flights, checks if the passenger has the same boarding
      * date before adding.
      * 
-     * @param input
+     * @param input  A Scanner Object used to take user input
      * @param id
      * @param dbConn
      */
@@ -970,8 +1146,8 @@ public class Frontend {
             String query = String.format("select *" +
                     "from flight join passenger_trip using (flight_id)" +
                     "where passenger_id = %d and trunc(boarding_time) in (select distinct trunc(boarding_time)" +
-                                                                        "from flight join passenger_trip using (flight_id)" +
-                                                                         "where flight_id != %d)", id, flight_id);
+                    "from flight join passenger_trip using (flight_id)" +
+                    "where flight_id != %d)", id, flight_id);
             boolean conflicting = false;
             try {
                 PreparedStatement statement = dbConn.prepareStatement(query);
@@ -1017,7 +1193,7 @@ public class Frontend {
      * passenger is
      * on that flight and if that flight_id is valid.
      * 
-     * @param input
+     * @param input  A Scanner Object used to take user input
      * @param id     Passenger_id
      * @param dbConn
      * @return
@@ -1058,7 +1234,7 @@ public class Frontend {
      * and if the passenger is a student(allowed 1 more bag). Changes num_bags field
      * in passenger_trip.
      * 
-     * @param input
+     * @param input  A Scanner Object used to take user input
      * @param id     Passenger id
      * @param dbConn
      */
@@ -1104,7 +1280,7 @@ public class Frontend {
      * passenger_id and benefit_id. Sanity checks benefit_id to make sure it is in
      * bounds.
      * 
-     * @param input  Scanner for input
+     * @param input  A Scanner Object used to take user input Scanner for input
      * @param remove A boolean where true if the user is removing a benefit from the
      *               passenger and
      *               false if the user is adding a benefit to the passenger.
@@ -1113,11 +1289,6 @@ public class Frontend {
      *               based on the passenger_id
      *               and benefit_id. Sanity checks benefit_id to make sure it is in
      *               bounds.
-     * @param input  Scanner for input
-     * @param remove A boolean where true if the user is removing a benefit from the
-     *               passenger and
-     *               false if the user is adding a benefit to the passenger.
-     * @param id     passenger ID
      * @param dbConn
      */
     private static void changeBenefits(Scanner input, Boolean remove, int id, Connection dbConn) {
@@ -1239,8 +1410,10 @@ public class Frontend {
     }
 
     /**
-     * Polymorphic method but takes in a prepared statement, used for queries that include
+     * Polymorphic method but takes in a prepared statement, used for queries that
+     * include
      * special SQL date fields.
+     * 
      * @param statement
      * @param dbConn
      * @param string_parameters
@@ -1293,7 +1466,7 @@ public class Frontend {
      * all instances of that
      * passenger across all tables
      * 
-     * @param input
+     * @param input  A Scanner Object used to take user input
      * @param dbConn
      */
     private static void deletePassengerInfo(Scanner input, Connection dbConn) {
@@ -1350,15 +1523,14 @@ public class Frontend {
                         System.out.println(answer.getString("Passenger_ID") + "\t"
                                 + answer.getInt("num_bags"));
                     }
-                }
-                else if (queryNumber == 4) {
+                } else if (queryNumber == 4) {
                     while (answer.next()) {
                         System.out.println(answer.getInt("passenger_id")
-                        + " ".repeat(colLengths[0] - String.valueOf(answer.getInt("passenger_id")).length())
-                        + "\t"
-                        + answer.getString("first_name")
-                        + " ".repeat(colLengths[1] - answer.getString("first_name").length()) + "\t"
-                        + answer.getString("last_name"));
+                                + " ".repeat(colLengths[0] - String.valueOf(answer.getInt("passenger_id")).length())
+                                + "\t"
+                                + answer.getString("first_name")
+                                + " ".repeat(colLengths[1] - answer.getString("first_name").length()) + "\t"
+                                + answer.getString("last_name"));
                     }
                 }
             }
@@ -1380,7 +1552,8 @@ public class Frontend {
      * the user for a date in each respective month until a valid date is inputed.
      *
      * 
-     * @param input the Scanner object used to read user input
+     * @param input A Scanner Object used to take user input the Scanner object used
+     *              to read user input
      * @param month the months of either march or june to validate
      * @return Returns a string of the valid user date in the respective month, or
      *         null if user exits
