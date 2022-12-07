@@ -114,7 +114,7 @@ public class Frontend {
             } else if (value.equals("4")) {
                 query4Handler(dbConn);
             } else if (value.equals("5")) {
-                query5Handler(input, dbConn);
+                query5Handler(dbConn);
             } else if (value.equals("rc")) {
                 editDatabase(input, dbConn);
             } else {
@@ -246,10 +246,10 @@ public class Frontend {
                     // Ensure that we only get results that have one of these records
                     + "GROUP BY pngrvalid.passenger_id, pngrvalid.first_name, pngrvalid.last_name "
                     + "HAVING COUNT(pngrvalid.passenger_id)=1";
-
-            System.out.println("\nDisplaying results for " + passengerType + " passengers who flew " +
-                    "only once in the month of March");
-            System.out.println("----------------------------------");
+	        String prntMsg = "\nDisplaying results for " + passengerType + " passengers who flew " +
+                "only once in the month of March";
+	        System.out.println(prntMsg);
+            System.out.println("-".repeat(prntMsg.length()));
 
             executeQuery(query, dbConn, 4);
 
@@ -268,9 +268,10 @@ public class Frontend {
                     + "AND flight.departing_time > " + juneStart + " "
                     + "AND flight.departing_time < " + julEnd;
 
-            System.out.println("\nDisplaying results for " + passengerType + " passengers" +
-                    " who traveled with exactly one checked bag in the months of June or July");
-            System.out.println("----------------------------------");
+            prntMsg = "\nDisplaying results for " + passengerType + " passengers" +
+                    " who traveled with exactly one checked bag in the months of June or July";
+	        System.out.println(prntMsg);
+            System.out.println("-".repeat(prntMsg.length()));
             executeQuery(query, dbConn, 4);
 
             // Ordered snacks/beverages query at least once
@@ -282,22 +283,59 @@ public class Frontend {
                     + "WHERE airline.name=" + airline
                     + "AND passenger_trip.num_items_purchased > 0";
 
-            System.out.println("\nDisplaying results for " + passengerType + " passengers" +
-                    " who ordered beverages at least once on a flight");
-            System.out.println("----------------------------------");
-            executeQuery(query, dbConn, 4);
+            prntMsg = "\nDisplaying results for " + passengerType + " passengers" +
+                    " who ordered beverages at least once on a flight";
+	        System.out.println(prntMsg);
+            System.out.println("-".repeat(prntMsg.length()));
+            executeQuery(query,dbConn, 4);
         }
 
     }
 
-    private static void query5Handler(Scanner input, Connection dbConn) {
-
+    /* Purpose: Performs the following custom query:
+     * For each distinct airline, lists the passenger that had the most
+     * flights on that airline if they are not a frequent flyer. Any airlines
+     * that have no passengers that meet this criteria will not be displayed.
+     * If there are any ties for the most trips between passengers, all passengers
+     * involved in the tie will be displayed.
+     * Creates the queries and has calls executeQuery on them.
+     *
+     * Parameters:
+     *  dbConn: The current connection to the database
+     *
+     * Returns: Nothing
+     */
+    private static void query5Handler(Connection dbConn) {
+        String query = "WITH airlineCounts as (SELECT airline.airline_id, airline.name, passenger.passenger_id, " +
+                "passenger.first_name, passenger.last_name, COUNT(*) tripcount " +
+                "FROM airline " +
+                "JOIN flight ON airline.airline_id=flight.airline_id " +
+                "JOIN passenger_trip ON flight.flight_id=passenger_trip.flight_id " +
+                "JOIN passenger ON passenger_trip.passenger_id=passenger.passenger_id " +
+                "JOIN passenger_benefit ON passenger.passenger_id=passenger_benefit.passenger_id " +
+                "JOIN benefit ON passenger_benefit.benefit_id=benefit.benefit_id " +
+                "WHERE benefit.category<>'frequentflyer' " +
+                "GROUP BY airline.airline_id, airline.name, passenger.passenger_id, passenger.first_name, passenger.last_name " +
+                ") " +
+                "SELECT airlineCounts.name \"Airline Name\", airlineCounts.passenger_id \"Passenger ID\", " +
+                "airlineCounts.first_name \"First Name\", airlineCounts.last_name \"Last Name\", airlineCounts.tripcount \"Trip Count\"" +
+                "FROM airlineCounts " +
+                "JOIN " +
+                "( " +
+                "SELECT airlineCounts.airline_id, MAX(airlineCounts.tripcount) maxtripcount " +
+                "FROM airlineCounts " +
+                "GROUP BY airlineCounts.airline_id " +
+                ") countsJoined ON airlineCounts.airline_id=countsJoined.airline_id AND countsJoined.maxtripcount=airlineCounts.tripcount " +
+                "ORDER BY airlineCounts.airline_id";
+	    System.out.println("Printing passengers with most trips per airline who are not frequent flyers.");
+	    System.out.println("----------------------------------------------------------------------------");
+        executeQuery(query, dbConn, 5);
     }
 
     /**
      * Method for sending the user to either change the airline side of passenger
      * side of the Database
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -329,7 +367,7 @@ public class Frontend {
     /**
      * Method for taking user input on if to add, update, or delete passenger info
      * from the database.
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -360,7 +398,7 @@ public class Frontend {
     /**
      * Method for asking the user if they would like to add, update, or delete a
      * flight
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -389,7 +427,7 @@ public class Frontend {
     }
 
     /**
-     * 
+     *
      * @param input A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -441,7 +479,7 @@ public class Frontend {
 
     /**
      * Method to handle user adding staff members to the database
-     * 
+     *
      * @param input A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -481,7 +519,7 @@ public class Frontend {
     }
 
     /**
-     * 
+     *
      * @param input A Scanner Object used to take user input
      * @param dbConn  the database connection used to send and recieve queries.
      * @param staffID Staff Id we are trying to change
@@ -542,7 +580,7 @@ public class Frontend {
     }
 
     /**
-     * 
+     *
      * @param input A Scanner Object used to take user input
      * @param dbConn  the database connection used to send and recieve queries.
      * @param staffID Staff Id we are trying to change
@@ -561,7 +599,7 @@ public class Frontend {
     /**
      * Adds a flight to the flight table using user input representing the different
      * fields in the flight table.
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param dbConn The database connection used to send and recieve queries.
      */
@@ -630,7 +668,7 @@ public class Frontend {
      * year, month, day, hour, and
      * minute and checks if inputs are valid. returns a long representation of the
      * java sql timestamp value of a string value of a date.
-     * 
+     *
      * @param input A Scanner Object used to take user input s
      * @return returns a long representing a dateTime.
      */
@@ -714,7 +752,7 @@ public class Frontend {
     /**
      * Allows the user to change certain values in flight and staff_trip tables via
      * questions.
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -776,7 +814,7 @@ public class Frontend {
 
     /**
      * Allows the user to change the staff on a flight via staff_trip
-     * 
+     *
      * @param input     A Scanner Object used to take user input
      * @param dbConn    the database connection used to send and recieve queries.
      * @param flight_id The flight id of the flight we are trying to change
@@ -831,7 +869,7 @@ public class Frontend {
     /**
      * Allows the user to change all fields in flight table exculding airlineID and
      * FlightId
-     * 
+     *
      * @param input     A Scanner Object used to take user input
      * @param dbConn    the database connection used to send and recieve queries.
      * @param toChange  The field we are trying to change
@@ -925,7 +963,7 @@ public class Frontend {
 
     /**
      * Allows the user to delete a flight from flight table
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -953,7 +991,7 @@ public class Frontend {
 
     /**
      * takes user input about a new passenger and adds it to the database.
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -985,7 +1023,7 @@ public class Frontend {
      * passenger side of the DB including fields from the passenger Table,
      * Passenger benefits, number of bags, the flights they take, and the food/drink
      * that they have
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -1063,7 +1101,7 @@ public class Frontend {
     /**
      * Allows the user to change the amount of food a passenger has bought on one of
      * their trips.
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param id     The id of the passenger
      * @param dbConn the database connection used to send and recieve queries.
@@ -1102,7 +1140,7 @@ public class Frontend {
      * Allows the user to update passenger info in realation to adding/removing
      * flights from the todatabase. When adding flights, checks if the passenger
      * has the same boarding date before adding.
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param id
      * @param dbConn the database connection used to send and recieve queries.
@@ -1197,7 +1235,7 @@ public class Frontend {
     /**
      * Takes user input of a flight number and returns that flight number if the
      * passenger is on that flight and if that flight_id is valid.
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param id     Passenger_id
      * @param dbConn the database connection used to send and recieve queries.
@@ -1237,7 +1275,7 @@ public class Frontend {
      * flight. Takes into account if the flight is real, if the passenger is on that
      * flight, and if the passenger is a student(allowed 1 more bag).
      * Changes num_bags field in passenger_trip.
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param id     Passenger id
      * @param dbConn the database connection used to send and recieve queries.
@@ -1283,7 +1321,7 @@ public class Frontend {
      * Uses user input to add/remove benefits from Passenger_benefits based on the
      * passenger_id and benefit_id. Sanity checks benefit_id to make sure it is in
      * bounds.
-     * 
+     *
      * @param input  A Scanner Object used to take user input Scanner for input
      * @param remove A boolean where true if the user is removing a benefit from the
      *               passenger and
@@ -1329,7 +1367,7 @@ public class Frontend {
      * the join
      * of 2 conditions (if sneaky enough, check changeNumBags()). Executes a query
      * andchecks if the query resulted in a Result set that is empty.
-     * 
+     *
      * @param id     Any Id that you want to check
      * @param table  the table which you want to check
      * @param dbConn Connection to the DB
@@ -1362,7 +1400,7 @@ public class Frontend {
 
     /**
      * Executes the query with a prepared statement to avoid sql injection entirely
-     * 
+     *
      * @param query             The query to be executed
      * @param dbConn            the database connection used to send and recieve
      *                          queries.
@@ -1417,7 +1455,7 @@ public class Frontend {
     /**
      * Polymorphic method but takes in a prepared statement, used for queries that
      * include special SQL date fields.
-     * 
+     *
      * @param statement         a Prepared statenemnt that is used to execute
      *                          queries via dbConn
      * @param dbConn            the database connection used to send and recieve
@@ -1474,7 +1512,7 @@ public class Frontend {
      * Allows the user to delete a passenger by their passenger_id number, deletes
      * all instances of that
      * passenger across all tables
-     * 
+     *
      * @param input  A Scanner Object used to take user input
      * @param dbConn the database connection used to send and recieve queries.
      */
@@ -1515,37 +1553,72 @@ public class Frontend {
         try {
             stmt = dbConn.createStatement();
             answer = stmt.executeQuery(query);
-            // The lengths of each of the column names for formatting purposes
-            int[] colLengths;
-            if (answer != null) {
-                // Get the data about the query result to learn
-                // the attribute names and use them as column headers
-                ResultSetMetaData answermetadata = answer.getMetaData();
-                colLengths = new int[answermetadata.getColumnCount()];
-                for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
-                    System.out.print(answermetadata.getColumnName(i) + "\t");
-                    colLengths[i - 1] = answermetadata.getColumnName(i).length();
-                }
-                System.out.println();
-                if (queryNumber == 2) {
-                    while (answer.next()) {
-                        System.out.println(answer.getString("Passenger_ID") + "\t"
-                                + answer.getInt("num_bags"));
-                    }
-                } else if (queryNumber == 4) {
-                    while (answer.next()) {
-                        System.out.println(answer.getInt("passenger_id")
-                                + " ".repeat(colLengths[0] - String.valueOf(answer.getInt("passenger_id")).length())
-                                + "\t"
-                                + answer.getString("first_name")
-                                + " ".repeat(colLengths[1] - answer.getString("first_name").length()) + "\t"
-                                + answer.getString("last_name"));
-                    }
+	    // The lengths of each of the column names for formatting purposes
+	    int[] colLengths;
+        if (answer != null) {
+            // Get the data about the query result to learn
+            // the attribute names and use them as column headers
+            ResultSetMetaData answermetadata = answer.getMetaData();
+		    colLengths = new int[answermetadata.getColumnCount()];
+            for (int i = 1; i <= answermetadata.getColumnCount(); i++) {
+                System.out.print(answermetadata.getColumnName(i) + "\t");
+                colLengths[i - 1] = answermetadata.getColumnName(i).length();
+            }
+		    System.out.println();
+            if (queryNumber == 2) {
+                while (answer.next()) {
+                    System.out.println(answer.getString("Passenger_ID") + "\t"
+                    + answer.getInt("num_bags"));
                 }
             }
-            dbConn.commit();
-            System.out.println();
-            stmt.close();
+            else if (queryNumber == 4){
+		        String[] vals = new String[3];
+		        int[] repeats = new int[3];
+                while (answer.next()){
+		    	    vals[0] = String.valueOf(answer.getInt("passenger_id"));
+			        vals[1] = answer.getString("first_name");
+			        vals[2] = answer.getString("last_name");
+			        for (int i = 0; i < vals.length; i++){
+				        repeats[i] = colLengths[i] - vals[i].length();
+				            if (repeats[i] < 0){
+					            repeats[i] = 0;
+				            }
+				        System.out.print(vals[i] + " ".repeat(repeats[i]) + "\t");
+			        }
+			        System.out.println();
+                }
+            }
+
+            else if (queryNumber == 5){
+		        String[] vals = new String[5];
+		        int[] repeats = new int[5];
+                while (answer.next()){
+                    vals[0] = answer.getString("Airline Name");
+                    vals[1] = String.valueOf(answer.getInt("Passenger ID"));
+                    vals[2] = answer.getString("First Name");
+                    vals[3] = answer.getString("Last Name");
+                    vals[4] = String.valueOf(answer.getInt("Trip Count"));
+			        for (int i = 0; i < vals.length; i++){
+                        repeats[i] = colLengths[i] - vals[i].length();
+                        if (repeats[i] < 0){
+                            repeats[i] = 0;
+                        }
+                        System.out.print(vals[i] + " ".repeat(repeats[i]) + "\t");
+                    }
+			        System.out.println();
+                }
+            }
+
+            else{
+
+            }
+                // Use next() to advance cursor through the result
+                // tuples and print their attribute values
+                // TODO: parse answers here
+        }
+        dbConn.commit();
+        System.out.println();
+        stmt.close();
         } catch (SQLException e) {
             System.err.println("*** SQLException:  "
                     + "Could not fetch query results.");
@@ -1560,7 +1633,7 @@ public class Frontend {
      * Takes the scanner input and the months of EITHER JUNE OR MARCH ONLY and asks
      * the user for a date in each respective month until a valid date is inputed.
      *
-     * 
+     *
      * @param input A Scanner Object used to take user input the Scanner object used
      *              to read user input
      * @param month the months of either march or june to validate
