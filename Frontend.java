@@ -22,8 +22,8 @@ public class Frontend {
         String password = null;
 
         if (args.length == 2) { // get username/password from cmd line args
-            username = args[0];
-            password = args[1];
+            username = "jessegomez";
+            password = "a3377";
         } else {
             System.out.println("\nUsage: java JDBC <username> <password>\n"
                     + " where <username> is your Oracle DBMS"
@@ -122,8 +122,8 @@ public class Frontend {
 
     private static void query1Handler(Connection dbConn) {
         String query = "SELECT DISTINCT first_name, last_name " +
-        "FROM Jessegomez.Passenger passenger INNER JOIN Jessegomez.Passenger_trip passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id " +
-        "Inner JOIN Jessegomez.Flight ptfj ON Passenger_trip.flight_id = ptfj.flight_id " +
+        "FROM Passenger passenger INNER JOIN Passenger_trip passenger_trip ON Passenger.passenger_id = Passenger_trip.passenger_id " +
+        "Inner JOIN Flight ptfj ON Passenger_trip.flight_id = ptfj.flight_id " +
         "GROUP BY first_name, last_name " +
         "HAVING COUNT(DISTINCT airline_id) = 4";;
         executeQuery(query, dbConn, 1);
