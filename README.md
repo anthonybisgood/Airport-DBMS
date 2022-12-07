@@ -42,5 +42,14 @@ Jesse Gomez:
 <ol>
 <li> Query 1 and 3 </li>
 <li> Relational schema diagram </li>
-<li> Functional Dependencies </li>
+<li> Functional Dependencies </li></ol>
 
+Gabriel Barnes:
+<ol>
+<li> Query 5 Idea</li>
+<li> Implementation (Query and Printing) of Queries 4 and 5</li></ol>
+
+Varun Subramanyan:
+<ol>
+<li>Database table creation</li>
+<li> Database table population</li></ol>
