@@ -1,7 +1,6 @@
 
 import java.sql.*;
 import java.util.*;
-import java.time.*;
 
 public class DataBasePopulator {
     public static void main(String[] args) {
@@ -80,7 +79,7 @@ public class DataBasePopulator {
                 String a = "airline_id integer , name varchar2(20)";
                 String apk = "airline_id";
                 createTables(dbconn, "airline", a, apk);
-
+                dbconn.close();
             } catch (SQLException e) {
                 System.out.println("error");
                 System.out.println(e);
@@ -188,6 +187,7 @@ public class DataBasePopulator {
                     sql.execute();
                 }
                 dbconn.commit();
+                dbconn.close();
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -223,6 +223,7 @@ public class DataBasePopulator {
                     sql.execute();
                 }
                 dbconn.commit();
+                dbconn.close();
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -278,6 +279,7 @@ public class DataBasePopulator {
                     }
                     dbconn.commit();
                 }
+                dbconn.close();
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -308,6 +310,7 @@ public class DataBasePopulator {
                     sql.execute();
                 }
                 dbconn.commit();
+                dbconn.close();
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -347,11 +350,12 @@ public class DataBasePopulator {
                     Timestamp endDate = new Timestamp(cal.getTime().getTime());
                     sql.setDate(1, new java.sql.Date(randDate.getTime()));
                     sql.setDate(2, new java.sql.Date(endDate.getTime()));
-                    sql.setInt(7, rand.nextInt(4));
+                    sql.setInt(7, rand.nextInt(4)+1);
 
                     sql.execute();
                 }
                 dbconn.commit();
+                dbconn.close();
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -399,7 +403,7 @@ public class DataBasePopulator {
                 }
 
                 dbconn.commit();
-
+                dbconn.close();
             } catch (Exception e) {
                 System.out.println(e);
                 System.out.println("didn't execute insert");
