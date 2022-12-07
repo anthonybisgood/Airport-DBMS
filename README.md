@@ -24,7 +24,7 @@ To Run JDBC application:
 <ol>
 <li>export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${PWD} </li>
 <li>javac Frontend.java </li>
-<li>java Frontend username password</li> </ol>
+<li>java Frontend</li> </ol>
 
 To run DataBasePopulator application:
 <ol>
