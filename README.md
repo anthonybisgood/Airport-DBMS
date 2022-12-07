@@ -49,3 +49,7 @@ Gabriel Barnes:
 <li> Query 5 Idea</li>
 <li> Implementation (Query and Printing) of Queries 4 and 5</li></ol>
 
+Varun Subramanyan:
+<ol>
+<li>Database table creation</li>
+<li> Database table population</li></ol>
