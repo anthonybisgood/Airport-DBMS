@@ -167,10 +167,14 @@ public class Frontend {
     }
 
     private static void query3Handler(Scanner input, Connection dbConn) {
-        String query = "SELECT DISTINCT flight_id, boarding_gate, name, boarding_time, departing_time, duration, origin, destination "
+        String query = "SELECT DISTINCT flight_id, boarding_gate, name, boarding_time, departing_time, duration, origin, destination  "
                 +
-                "FROM Flight WHERE EXTRACT(MONTH FROM Flight.boarding_time) = 6 AND " +
-                "EXTRACT(DAY FROM Flight.boarding_time) = ?";
+                "FROM Flight JOIN Airline USING (airline_id) " 
+                +
+                " WHERE EXTRACT(MONTH FROM Flight.boarding_time) = 6 AND "
+                +
+                "EXTRACT(DAY FROM Flight.boarding_time) = ? " + 
+                "ORDER BY Flight.boarding_time";
         HashMap<Integer, String> string_parameters = new HashMap<Integer, String>();
         HashMap<Integer, Integer> int_parameters = new HashMap<Integer, Integer>();
         String month = validateDate(input, "june");
