@@ -21,11 +21,13 @@ public class Frontend {
                 "jdbc:oracle:thin:@aloe.cs.arizona.edu:1521:oracle";
         String username = null;
         String password = null;
-
         if (args.length == 2) { // get username/password from cmd line args
             username = args[0];
             password = args[1];
-        } else {
+        } else if (args.length == 0) {
+            username = "anthonybisgood";
+            password = "a8156";
+        }else {
             System.out.println("\nUsage: java JDBC <username> <password>\n"
                     + " where <username> is your Oracle DBMS"
                     + " username,\n and <password> is your Oracle"
