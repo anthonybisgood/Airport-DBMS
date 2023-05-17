@@ -1,5 +1,5 @@
 # TUS Airport DBMS
-In this project, we built a database–driven information management system from ground up by implementing a a two–tier client–server architecture on Oracles DBMS. The user is able to query the database via the JDBC text based program Frontend.java.
+In this project, we built a database–driven information management system from ground up by implementing a a two–tier client–server architecture on Oracles. The user is able to query the database via the JDBC text based program Frontend.java.
 
 The underlying database mimics an airport with the ability to store passenger, flight, and staff member information. Users are able to add, update and delete fields in this table through the text application. In addition, there are 5 pre-made queries.
 <ol>
