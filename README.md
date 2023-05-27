@@ -31,25 +31,3 @@ To run DataBasePopulator application:
 <li>export CLASSPATH=/usr/lib/oracle/19.8/client64/lib/ojdbc8.jar:${PWD} </li>
 <li>javac DataBasePopulator.java </li>
 <li>java DataBasePopulator</li> </ol>
-
-Anthony Bisgood:
-<ol>
-<li> Query 2 </li>
-<li> Ability for user to add, update or delete a passenger and their details, including the passenger’s history. </li>
-<li> Ability for user to insert, update or delete flights, staff and their details. </li> </ol>
-
-Jesse Gomez:
-<ol>
-<li> Query 1 and 3 </li>
-<li> Relational schema diagram </li>
-<li> Functional Dependencies </li></ol>
-
-Gabriel Barnes:
-<ol>
-<li> Query 5 Idea</li>
-<li> Implementation (Query and Printing) of Queries 4 and 5</li></ol>
-
-Varun Subramanyan:
-<ol>
-<li>Database table creation</li>
-<li> Database table population</li></ol>
